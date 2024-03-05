@@ -23,7 +23,8 @@
         "zoujingli/ip2region": "^1.0",
         "workerman/gateway-worker": "^3.0",
         "workerman/gateway-worker-for-win": "^3.0",
-        "khanamiryan/qrcode-detector-decoder": "1.0.5.2"
+        "khanamiryan/qrcode-detector-decoder": "1.0.5.2",
+        "phpseclib/phpseclib": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -35,5 +36,11 @@
     },
     "config": {
         "preferred-install": "dist"
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
+        }
     }
 }

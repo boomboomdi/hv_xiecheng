@@ -19,19 +19,45 @@
                 <div class="layui-card-body">
                     <form class="layui-form" action="" lay-filter="component-form-element">
                         <div class="layui-row layui-col-space10 layui-form-item">
+
                             <div class="layui-col-lg6">
                                 <label class="layui-form-label">核商标识：</label>
                                 <div class="layui-input-block">
                                     <input type="text" name="write_off_sign" lay-verify="required"
-                                           placeholder="核销商标识/后台账号"
+                                           placeholder="核销商标识"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-col-lg6">
+                                <label class="layui-form-label">商户id：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="merhant_id" lay-verify="required"
+                                           placeholder="商户id"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-col-lg6">
+                                <label class="layui-form-label">商户密钥：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="secret_key" lay-verify="required"
+                                           placeholder="商户密钥"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                           <div class="layui-col-lg6">
+                                <label class="layui-form-label">签名密钥：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="token" lay-verify="required"
+                                           placeholder="签名密钥"
                                            autocomplete="off" class="layui-input">
                                 </div>
                             </div>
 
                             <div class="layui-col-lg6">
-                                <label class="layui-form-label">协议密钥：</label>
+                                <label class="layui-form-label">初始押金：</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="token" lay-verify="required" placeholder="协议密匙"
+                                    <input type="text" name="write_off_deposit"
+                                           placeholder="请输入初始押金/没定好不输入"
                                            autocomplete="off" class="layui-input">
                                 </div>
                             </div>

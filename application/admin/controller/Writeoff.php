@@ -90,27 +90,32 @@ class Writeoff extends Base
         if (request()->isPost()) {
 
             $param = input('post.');
-//            var_dump($param);exit;
             $validate = new WriteoffValidate();
             if (!$validate->check($param)) {
                 return ['code' => -1, 'data' => '', 'msg' => $validate->getError()];
             }
 
-            $param['write_off_username'] = $param['write_off_sign'];
-//            $param['merchant_validate_password'] = makePassword($param['merchant_validate_password']);
+            //卡密编码 walmart
+            //商户id   加密密钥       secretkey  签名密钥
+            $param['token'] = $param['token'];  //token
+            $param['secret_key'] = $param['secret_key'];   //密钥
+//            $param['weight'] = $param['weight'];
+            $param['status'] = $param['status'];
+            $param['write_off_deposit'] = $param['write_off_deposit'];
+
 
             $writeOffModel = new WriteoffModel();
             $res = $writeOffModel->addWriteoff($param);
 
-            Log::write("添加核销：" . $param['write_off_username']);
+            Log::write("管理员" . session('admin_user_name') . "添加核销服务商：" . $param['write_off_sign'] . "=>" . $res['msg']);
 
             return json($res);
         }
 
-//        $this->assign([
-//            'roles' => (new \app\admin\model\Role())->getAllRoles()['data']
-//        ]);
+        $db = new Db();
+        $camiTypeData = $db::table('bsa_cami_type')->select();
 
+        $this->assign('camiTypeData', $camiTypeData);
         return $this->fetch('add');
     }
 
@@ -126,24 +131,81 @@ class Writeoff extends Base
                 return ['code' => -1, 'data' => '', 'msg' => $validate->getError()];
             }
 
+
             $param['write_off_username'] = $param['write_off_sign'];
+//            $param['token'] = $param['token'];
+//            $param['weight'] = $param['weight'];
+//            $param['status'] = $param['status'];
+//            $param['write_off_deposit'] = $param['write_off_deposit'];
+//            var_dump($param);exit;
             $writeOffModel = new WriteoffModel();
             $res = $writeOffModel->editWriteoff($param);
 
-            Log::write("编辑核销：" . $param['write_off_username']);
 
+            Log::write("管理员" . session('admin_user_name') . "编辑核销服务商：" . $param['write_off_sign'] . "=>" . $res['msg']);
             return json($res);
         }
         $writeOffId = input('param.write_off_id');
-//        var_dump($merchantId);exit;
         $writeOffModel = new WriteoffModel();
-//        $writeOffData = $writeOffModel->get(["write_off_id" => $writeOffId]);
-//        $writeOffData = $writeOffData['data'];
         $this->assign([
             'writeOff' => $writeOffModel->getWriteoffById($writeOffId)['data'],
         ]);
 
         return $this->fetch('edit');
+    }
+
+    /**
+     * 添加核销商余额
+     * @return void
+     */
+    public function addWriteOffAmount()
+    {
+
+        if (request()->isAjax()) {
+
+            $param = input('post.');
+
+            $validate = new WriteoffValidate();
+            if (!$validate->check($param)) {
+                return json(['code' => -1, 'data' => '', 'msg' => $validate->getError() . "dada"]);
+            }
+
+            if (!isset($param['add_write_off_deposit']) || empty($param['add_write_off_deposit']) || !is_numeric($param['add_write_off_deposit'])) {
+                return json(['code' => -2, 'data' => '', 'msg' => "请输入添加金额"]);
+            }
+            $db = new Db();
+            $db::startTrans();
+            $where['write_off_id'] = $param['write_off_id'];
+            $lockWriteOffData = $db::table('bsa_write_off')->where($where)->lock(true)->find();
+            if (!$lockWriteOffData) {
+                $db::rollback();
+                return json(['code' => -3, 'data' => '', 'msg' => "系统繁忙1"]);
+            }
+
+            //更新余额和可用金额
+//            $update['write_off_deposit'] = bcadd($lockWriteOffData['write_off_deposit'], $param['add_write_off_deposit']);
+//            $update = [
+//                'write_off_deposit' => Db::raw('write_off_deposit' + $param['add_write_off_deposit']),
+//            ];
+            $update = $db::table('bsa_write_off')->where($where)
+                ->setInc('write_off_deposit', $param['add_write_off_deposit']);
+            if (!$update) {
+                $db::rollback();
+                return json(['code' => -4, 'data' => '', 'msg' => "系统繁忙2"]);
+            }
+
+            $db::commit();
+            Log::write("管理员" . session('admin_user_name') . "更新余额和可用金额：" . $param['write_off_sign'] . "=>" . $lockWriteOffData['write_off_deposit'] . "增加：" . $param['add_write_off_deposit']);
+
+            return json(['code' => 0, 'data' => '', 'msg' => "更新成功"]);
+        }
+        $writeOffId = input('param.write_off_id');
+        $writeOffModel = new WriteoffModel();
+        $this->assign([
+            'writeOff' => $writeOffModel->getWriteoffById($writeOffId)['data'],
+        ]);
+
+        return $this->fetch('addwriteoffamount');
     }
 
     /**

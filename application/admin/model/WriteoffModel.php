@@ -8,7 +8,9 @@
  */
 namespace app\admin\model;
 
+use think\Db;
 use think\Model;
+use tool\Log;
 
 class WriteoffModel extends Model
 {
@@ -26,6 +28,28 @@ class WriteoffModel extends Model
         try {
             $res = $this->field($prefix . 'write_off.*' )->where($where)
             ->order('write_off_id', 'desc')->paginate($limit);
+        }catch (\Exception $e) {
+
+            return modelReMsg(-1, '', $e->getMessage());
+        }
+        return modelReMsg(0, $res, 'ok');
+    }
+
+    /**
+     * 获取卡密服务商
+     * @param $limit2
+     * @param $where
+     * @return array
+     */
+    public function getIndex2($limit, $where)
+    {
+        $prefix = config('database.prefix');
+        try {
+            $db = new Db();
+            $res = $db::table($prefix.'cami_write')
+                ->field($prefix . 'cami_write.*')
+                ->order($prefix.'cami_write.id')
+                ->paginate($limit);
         }catch (\Exception $e) {
 
             return modelReMsg(-1, '', $e->getMessage());
@@ -87,10 +111,12 @@ class WriteoffModel extends Model
             $has = $this->where('write_off_username', $writeoff['write_off_username'])->where('write_off_id', '<>', $writeoff['write_off_id'])
                 ->findOrEmpty()->toArray();
             if(!empty($has)) {
-                return modelReMsg(-2, '', '商户名已经存在');
+                return modelReMsg(-2, '', '核销服务商名称已经存在');
             }
+
             $writeoff['last_update_time'] = date("Y-m-d H:i:s",time());
             $this->save($writeoff, ['write_off_id' => $writeoff['write_off_id']]);
+
         }catch (\Exception $e) {
 
             return modelReMsg(-1, '', $e->getMessage());

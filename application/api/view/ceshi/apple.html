@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+  <title>收银台</title>
+  <script src="static/js/rem.js"></script>
+  <link rel="stylesheet" href="static/css/index.css">
+</head>
+<body>
+<img src="static/picture/bg_top.png" class="bg-top">
+<div id="app" class="app" style="display: block;">
+  <div class="wrap">
+    <h3>
+      <img src="static/picture/apple.png">
+      <span class="paytitle">苹果卡密</span>
+    </h3>
+    <!--<p class="tips">
+        无法充值或者提示错误，请联系客服！<br>
+        <b>已开启支付安全/自动充值中心</b>
+    </p>-->
+    <!--扫码元素-->
+    <div id="qrcode" class="money-wrap" style="display: none;margin-top:10px"></div>
+    <!--金额-->
+    <div class="money-wrap">
+      <h2 class="money">￥<span id="amount"></span></h2>
+    </div>
+    <p class="warning-tips">
+      <img src="static/picture/icon_tishi.png">
+      请在规定时间内付款 超时之后请勿支付<br>
+      <b>请勿修改账号或金额 否则不到账 不退款</b><br>
+
+      <!--<b id="downfg">—</b><br>-->
+
+      <b>请输入充值密码</b><br>
+    <div class="money-wrap">
+      <b>充值密码</b>
+      <input id="CardKey"  type="text" style="border: 3px solid #7fdee4 ;width:100%;height:30px" placeholder="上传X开头得卡密"/><br>
+    </div>
+    </p>
+
+
+    <p class="warning-tips">
+      <!--<b>请输入充值密码</b>-->
+
+    <div>
+      <button type="button" style="border-radius:20px;background:#009f95;width:200px;height:30px;color:#fff;" onclick="submit()">提交后上分</button><br>
+    </div>
+    <br>
+    </p>
+
+
+    <!--时间元素-->
+    <div class="time-item">
+      <strong id="hour_show">0时</strong>
+      <strong id="minute_show">0分</strong>
+      <strong id="second_show">0秒</strong>
+    </div>
+    <!--复制元素-->
+    <div id="copy_user"></div>
+  </div>
+  <!--btn-->
+  <div class="btn-wrap">
+    <div class="btn" id="title" style="display:none" onclick="read1()">
+      <span id="opens">京东购买1</span>
+    </div>
+    <!--btn2-->
+    <div class="btn" id="title_2" style="display:none" onclick="read()">
+      <span id="opens">京东购买2</span>
+    </div>
+  </div>
+  <!--<div style="text-align:center"><a href="#" style="color:red; font-size:20px" onclick="look()">不知道怎么支付？点击查看支付教程</a></div>-->
+
+</div>
+<!--支付成功-->
+<div id="paySuccess" class="paySuccess">
+  <div>
+    <img class="successIcon" src="static/picture/icon_success.png" alt="">
+  </div>
+  <div>支付成功 跳转中</div>
+</div>
+<!--提交成功-->
+<div id="SubmitSuccess" class="paySuccess">
+  <div>
+    <img class="successIcon" src="static/picture/icon_success.png" alt="">
+  </div>
+  <div>提交成功 处理中</div>
+</div>
+<!--支付超时-->
+<div id="payTimeout" class="payTimeout">
+  <div>
+    <img class="payTimeoutIcon" src="static/picture/icon_failed.png" alt="">
+  </div>
+  <div>支付超时 请重新下单</div>
+</div>
+<!--支付出错-->
+<div id="payError" class="payTimeout">
+  <div>
+    <img class="payTimeoutIcon" src="static/picture/icon_failed.png" alt="">
+  </div>
+  <div>支付出错 请重新下单</div>
+</div>
+
+<div id="tbAlertBox" class="tbAlertBox">
+  <div id="tbAlert" class="tbAlert">
+    <div id="copyText"></div>
+    <div class="closeBox">
+      <button id="closeBtn" class="closeBtn">关闭</button>
+    </div>
+  </div>
+</div>
+<div class="mask" id="load">
+  <span></span>
+</div>
+<div id="jdyd" style="display:none">
+  <!--京东网易-->
+  <div class="zhezhao zhezhao1" style="display:none">
+    <div class="yindao">
+      <!--<img src="static/picture/1.png" alt="" class="step step1">
+      <button type="button" class="btn-zhe zhezhao1_btns">下一个步骤</button>
+      <img src="static/picture/2.png" alt="" class="step step3" style="display:none">
+      <button type="button" class="btn-zhe zhezhao1_btn3" style="display:none" id="reads" onclick="copy('reads')">我明白，打开京东商城</button>-->
+
+      <img src="static/picture/apple_jd.jpg" alt="" class="step step1">
+      <button type="button" class="btn-zhe zhezhao1_btns" onclick="copy('reads')">我明白，打开京东商城</button>
+
+      <!--<img src="static/picture/apple_jd.jpg" alt="" class="step step1">
+      <button type="button" class="btn-zhe zhezhao1_btns" id="reads1">我明白，打开京东商城</button>-->
+
+    </div>
+  </div>
+</div>
+
+
+<!--引导支付笔数-->
+<div class="zhezhao_multiple" style="display:none">
+  <div class="yindao">
+    <img src="static/picture/beishu.png" alt="" class="step">
+    <button type="button" class="btn-zhe" id="reads_2" onclick="copy('reads_2')">我明白，打开京东商城</button>
+  </div>
+</div>
+<div id="zfbyd" style="display:none">
+  <!--支付宝引导-->
+  <div class="zhezhao zhezhao1">
+    <div class="yindao">
+
+      <!--<img src="static/picture/apple_tb.jpg" alt="" class="step step1">-->
+      <!--<button type="button" class="btn-zhe zhezhao1_btns"  id="reads1">我明白，打开支付宝</button>-->
+      <img src="static/picture/apple_jd.jpg" alt="" class="step step1">
+      <button type="button" class="btn-zhe zhezhao1_btns" id="reads1">我明白，打开京东商城</button>
+
+    </div>
+  </div>
+</div>
+
+
+<script src="static/js/qrcode.min.js"></script>
+<script src="static/js/jquery-1.10.2.min.js"></script>
+<script src="static/js/layui.all.js"></script>
+<script src='static/js/clipboard.min.js'></script>
+<script type="text/javascript">
+  setTimeout("geturl()", 1000);
+  var serial_no, sign, qtype, payurl, t, zone, countdownTimer, queryTimer, user, payurl_2, beishu, ActualAmount
+  var intDiff = 120;
+  intDiff = 600;
+
+
+  function view() {
+    $('.zhezhao_multiple').show();
+    $('.zhezhao').hide();
+  }
+
+  function look() {
+    $('.zhezhao').show();
+  }
+
+  function copy(name) {
+    $("#jdyd").css("display", "block");
+    $("#zfbyd").css("display", "none");
+    $('.zhezhao_multiple').hide();
+    var clipboard = new ClipboardJS('#' + name, {
+      text: function () {
+        return user;
+      }
+    });
+    clipboard.on('success', function (e) {
+      e.clearSelection();
+    });
+    if (name == 'title' || name == 'reads') {
+      var msgss = "如果京东付款不了，可以“淘宝”“拼多多”搜索 <br> app store电子充值卡 选择对应金额付款成功后上传卡密<br>【淘宝，拼多多购买卡密有折扣】 <br><div style='color:red'><b>" + ps + "</b></div>"
+    } else if (name == 'reads_2') {
+      var msgss = "复制成功 如没自动复制成功 请手动复制 <br> 商品数量请选择 数量 <b style='font-size: 40px;'>" + beishu + "</b> 请打开京东商城 <br>并按照引导图粘贴到指定位置 <br><div style='color:red'><b>" + ps + "</b></div>"
+    }
+    cp = layer.confirm(msgss, {
+              title: '温馨提醒',
+              skin: 'layui-layer-molv',
+              btn: ['打开京东商城']
+            }, function () {
+              window.location.href = payurl;
+            }, function () {
+              if (name == 'title' || name == 'reads') {
+                look();
+              } else if (name == 'reads_2') {
+                view();
+              }
+
+            }
+    );
+  }
+  ////倒计时
+  //function daojishi() {
+  //    var time = $("#time").text();
+  //    if (time == 1) {
+  //        //$('.zhezhao').hide();
+  //        $("#reads1").css("display", "block");
+  //        $("#reads1").css("margin-left", "25%");
+
+  //        $("#qu_reads").css("display", "block");
+  //        $("#qu_reads").css("margin-left", "25%");
+
+  //        $("#jd_reads").css("display", "block");
+  //        $("#jd_reads").css("margin-left", "25%");
+
+  //        $("#clock").css("display", "none");
+  //    } else {
+  //        time = time - 1;
+  //        $("#time").text(time);
+  //    }
+  //}
+  function copy_zfb() {
+    var clipboard = new ClipboardJS('#title', {
+      text: function () {
+        return user;
+      }
+    });
+    clipboard.on('success', function (e) {
+      e.clearSelection();
+    });
+    cp = layer.confirm("如果京东付款不了，可以“京东”“拼多多”搜索<br>app store电子充值卡 选择对应金额付款成功后上传卡密<br>【淘宝，拼多多购买卡密有折扣】 <br><div style='color:red'><b>" + ps + "</b></div>", {
+      skin: 'layui-layer-molv',
+      btn: ['打开支付宝']
+    }, function () {
+      layer.close(cp);
+      window.location.href = payurl_2;
+    });
+  }
+  function read() {
+    $("#jdyd").css("display", "none");
+    $("#zfbyd").css("display", "block");
+
+    layer.msg("请先认真阅读支付流程 ");
+    $('.zhezhao').show();
+
+    //$("#reads1").css("display", "none");
+    $("#qu_reads").css("display", "none");
+    $("#jd_reads").css("display", "none");
+    //
+    $("#clock").css("display", "block");
+    $("#clock").css("margin-left", "25%");
+    $("#reads1").attr("onclick", "copyss()");
+    //setInterval(daojishi, 1000);
+    setTimeout(() => {
+
+      $("#qu_reads").attr("onclick", "qu_msgbox()");
+      $("#jd_reads").attr("onclick", "jd_msg()");
+      //opens
+    }, 1000);
+  }
+  function read1() {
+    $("#jdyd").css("display", "block");
+    $("#zfbyd").css("display", "none");
+
+    layer.msg("请先认真阅读支付流程 ");
+    $('.zhezhao').show();
+
+    //$("#reads1").css("display", "none");
+    $("#qu_reads").css("display", "none");
+    $("#jd_reads").css("display", "none");
+    //
+    $("#clock").css("display", "block");
+    $("#clock").css("margin-left", "25%");
+    //setInterval(daojishi, 1000);
+    setTimeout(() => {
+      $("#qu_reads").attr("onclick", "qu_msgbox()");
+      $("#jd_reads").attr("onclick", "jd_msg()");
+      //opens
+    }, 1000);
+  }
+  function copyss() {
+    var clipboard = new ClipboardJS('#reads', {
+      text: function () {
+        return user;
+      }
+    });
+    /*var clipboard = new ClipboardJS('#reads');*/
+    clipboard.on('success', function (e) {
+      e.clearSelection();
+    });
+    clipboard.on('error', function (e) {
+      alert("无法访问粘贴板")
+    });
+    //cp = layer.confirm("如果淘宝付款不了，可以“京东”“拼多多”搜索<br>app store电子充值卡 选择对应金额付款成功后上传卡密<br>【淘宝，拼多多购买卡密有折扣】 <br><div style='color:red'><b>" + ps + "</b></div>", {
+    //    btn: ['打开支付宝']
+    //}, function () {
+    //    layer.close(cp);
+    //    window.location.href = payurl_2;
+    //});
+    cp = layer.confirm("如果京东付款不了，可以“淘宝”“拼多多”搜索<br>app store电子充值卡 选择对应金额付款成功后上传卡密<br>【淘宝，拼多多购买卡密有折扣】 <br><div style='color:red'><b>" + ps + "</b></div>", {
+      btn: ['打开京东']
+    }, function () {
+      layer.close(cp);
+      window.location.href = payurl_2;
+    });
+  }
+  function qu_msgbox() {
+    layer.open({
+      type: 1,
+      skin: 'layui-layer-molv',
+      area: ['280px', '200px'], //宽高
+      content:
+              '<h3 style = "color:red;text-align: center">复制充值账号</h3><h4 style="text-align: center">账号：' + user + ' ' +
+              '<button type="button" style = "border-radius:50px;background:#009f95;width:60px;height:30px" id="copy_qu_user" onclick="copy_qu_user()">复制</button></h4>' +
+              '<h3 style = "color:red;text-align: center">信息务必填对 不可更改账号 更改区服 更改金额 否则不到账</h3>'
+      //'<h3 style = "color:red;text-align: center">第一步：复制账号区服</h3><h4 style="text-align: center">区服：'+ zone+' '+
+      //'<button type="button" style = "border-radius:50px;background:#009f95;width:60px;height:30px" id="copy_qu_zone" onclick="copy_qu_zone()">复制</button></h4>'+
+    });
+  }
+  function h5() {
+    window.location.href = payurl;
+  }
+
+  function manage(type) {
+    if (type == 2) {
+      $("#payError").css("display", "block");
+      $("#app").css("display", "none");
+      $("#load").css("display", "none");
+    } else {
+      $("#load").css("display", "none");
+      loadmsg();
+      countdownTimer = window.setInterval("countDown()", 1000);
+    }
+  }
+  function countDown() {
+    var day = 0,
+            hour = 0,
+            minute = 0,
+            second = 0;//时间默认值
+    if (intDiff > 0) {
+      day = Math.floor(intDiff / (60 * 60 * 24));
+      hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+      minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+      second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+    }
+    if (minute <= 9) minute = '0' + minute;
+    if (second <= 9) second = '0' + second;
+    $('#hour_show').html('<s id="h"></s>' + hour + '时');
+    $('#minute_show').html('<s></s>' + minute + '分');
+    $('#second_show').html('<s></s>' + second + '秒');
+    if (hour <= 0 && minute <= 0 && second <= 0) {
+      qrcode_timeout();
+    }
+    intDiff = intDiff - 1;
+  }
+  function qrcode_timeout() {
+    $("#payTimeout").css("display", "block");
+    $("#app").css("display", "none");
+    clearTimer();
+  }
+  function clearTimer() {
+    window.clearInterval(countdownTimer);
+  }
+  function loadmsg() {
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: "/api/BankPay/SelOrder",
+      timeout: 10000, //ajax请求超时时间10s
+      data: { serial_no: serial_no },
+      success: function (obj, textStatus) {
+        //从服务器得到数据，显示数据并继续查询
+        //if(obj.code == 1 || obj.code == 4)
+        //{
+        //    $("#paySuccess").css("display", "block");
+        //     $("#app").css("display", "none");
+        //    setTimeout(window.location.href = obj.cburl, 1000);
+        //} else {
+        //    setTimeout("loadmsg()", 2000);
+        //}
+
+        var Returncode = obj.Returncode;
+        var SubmitType = obj.SubmitType;
+
+        var CallbackUrl = obj.CallbackUrl;
+        var IsOpen = obj.IsOpen;
+        if (IsOpen) {
+          if (Returncode == 1) {
+            $("#paySuccess").css("display", "block");
+            $("#app").css("display", "none");
+            setTimeout(window.location.href = CallbackUrl, 1000);
+          }
+          else {
+            if (SubmitType == 1) {
+              $("#SubmitSuccess").css("display", "block");
+              $("#app").css("display", "none");
+            }
+          }
+          setTimeout("loadmsg()", 2000);
+        }
+        else {
+          status(2);
+          //setTimeout("loadmsg()", 2000);
+        }
+      },
+      //Ajax请求超时，继续查询
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+        if (textStatus == "timeout") {
+          setTimeout("loadmsg()", 1000);
+        } else { //异常
+          setTimeout("loadmsg()", 4000);
+        }
+      }
+    });
+  }
+
+  function open_sm(qr) {
+    $("#qrcode").css("display", "block");
+    $('#qrcode').html('<img src="' + qr + '" />');
+  }
+
+  function getQueryString(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+    var r = window.location.search.substr(1).match(reg);
+
+    if (r != null) {
+      return unescape(r[2]);
+    }
+    return null;
+  }
+
+  function geturl() {
+    var Token = getQueryString("Token");
+    indexu = layer.msg('匹配订单中，预计5-10秒请不要离开', { icon: 16, shade: 0.01, shadeClose: false, time: 60000 });
+    $.ajax({
+      type: "get",
+      dataType: "json",
+      url: "/api/BankPay/PayWYAli?Token=" + Token + "",
+      timeout: 20000, //ajax请求超时时间10s
+      success: function (obj) {
+        var QRNumber = obj.QRNumber;
+        ActualAmount = obj.ActualAmount;
+        var State = obj.State;
+        var IsOpen = obj.IsOpen;
+        var OrderID = obj.OrderID;
+        var Type = obj.Type;
+        var QRType = obj.QRType;
+        var StoreLink = obj.StoreLink;
+        var StoreLink1 = obj.StoreLink1;
+        var OpenType = obj.OpenType;
+        if (OpenType == "ALL") {
+          //$("#downjd").css("display", "block");
+          //$("#downtb").css("display", "block");
+          $('#title').show();
+          $('#title_2').show();
+          $('#downjd').show();
+          $('#downtb').show();
+        }
+        if (OpenType == "TB") {
+          $('#downjd').hide();
+          $('#downtb').show();
+          $('#title').hide();
+          $('#title_2').show();
+
+        }
+        if (OpenType == "JD") {
+          $('#downjd').show();
+          $('#downtb').hide();
+          $('#title').show();
+          $('#title_2').hide();
+        }
+
+        if (IsOpen) {
+          layer.msg("订单匹配成功");
+          document.getElementById("amount").innerHTML = ActualAmount;
+          //$('#copy_user').html('手动复制充值账号：' + QRNumber);
+          serial_no = Token;
+          user = QRNumber;
+          layer.close(indexu);
+          //sign = obj.sign;
+          qtype = Type;
+          payurl = StoreLink;
+          payurl_2 = StoreLink1;
+          ps = '';
+          //document.getElementById("AccountName").val = AccountName;
+          manage(1);
+        }
+        else {
+          manage(2);
+          layer.confirm("订单已超时", {
+            skin: 'layui-layer-molv',
+            btn: ['知道了']
+          });
+          layer.close(indexu);
+          clearTimer();
+        }
+      },
+      //Ajax请求超时，继续查询
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+        if (textStatus == "timeout") {
+          setTimeout("geturl()", 1000);
+        } else { //异常
+          setTimeout("geturl()", 4000);
+        }
+      }
+    });
+  }
+  $(function () {
+    $('.zhezhao').hide();
+    var num = 0;
+    $('.zhezhao1_btns').click(function () {
+      $('.zhezhao').hide();
+      //$('.zhezhao1_btns').hide();
+      //$('.zhezhao1_btn3').show();
+
+    })
+    //$('.zhezhao1_btn3').click(function () {
+    //    num = 0;
+    //    $('.zhezhao').hide();
+    //    $('.step1').show();
+    //    $('.step3').hide();
+    //    $('.zhezhao1_btns').show();
+    //    $('.zhezhao1_btn3').hide();
+    //})
+  });
+
+  function down(type) {
+    if (type == 'jd_g') {
+      window.location.href = "https://wqs.jd.com/downloadApp/download.html";
+    } else if (type == 'tb_g') {
+      window.location.href = "https://market.m.taobao.com/app/fdilab/download-page/main/index.html";
+    } else if (type == 'tb_h5') {
+      window.location.href = "https://market.m.taobao.com/app/fdilab/download-page/main/index.html";
+    } else if (type == 'tm_g') {
+      window.location.href = "https://www.tmall.com/wow/portal/act/app-download";
+    } else if (type == 'dy_g') {
+      window.location.href = "https://www.douyin.com/home";
+    } else if (type == 'epay_g') {
+      window.location.href = "https://epay.163.com/download/app/new.htm";
+    } else if (type == 'pdd_g') {
+      window.location.href = "https://www.pinduoduo.com/home/download/";
+    } else if (type == 'zfb_g') {
+      window.location.href = "https://mobile.alipay.com/index.htm";
+    }
+  }
+  function submit() {
+    var Token = getQueryString("Token");
+    var CardKey = $('#CardKey').val();
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: "/api/BankPay/SubmitOrder",
+      timeout: 10000, //ajax请求超时时间10s
+      data: { CardKey: CardKey, serial_no: serial_no, Token: Token},
+      success: function (obj, textStatus) {
+        var Status = obj.Status;
+        var Msg = obj.Msg;
+        if (Status == 0) {
+          layer.msg("订单提交成功");
+          $("#SubmitSuccess").css("display", "block");
+          $("#app").css("display", "none");
+        }
+        else {
+          layer.msg(Msg);
+        }
+
+      }
+    });
+  }
+</script>
+</body>
+</html>

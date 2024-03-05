@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "328d4b1864f07d52531cb6dd8eb71cc0",
+    "content-hash": "f843b343bbfd6352f08930475c96aacd",
     "packages": [
         {
             "name": "khanamiryan/qrcode-detector-decoder",
@@ -18,7 +18,13 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/khanamiryan/php-qrcode-detector-decoder/zipball/04fdd58d86a387065f707dc6d3cc304c719910c1",
                 "reference": "04fdd58d86a387065f707dc6d3cc304c719910c1",
-                "shasum": ""
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "php": ">=5.6"
@@ -62,6 +68,122 @@
             "time": "2021-07-13T18:46:38+00:00"
         },
         {
+            "name": "phpseclib/phpseclib",
+            "version": "2.0.47",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpseclib/phpseclib.git",
+                "reference": "b7d7d90ee7df7f33a664b4aea32d50a305d35adb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/b7d7d90ee7df7f33a664b4aea32d50a305d35adb",
+                "reference": "b7d7d90ee7df7f33a664b4aea32d50a305d35adb",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "phing/phing": "~2.7",
+                "phpunit/phpunit": "^4.8.35|^5.7|^6.0|^9.4",
+                "squizlabs/php_codesniffer": "~2.0"
+            },
+            "suggest": {
+                "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
+                "ext-libsodium": "SSH2/SFTP can make use of some algorithms provided by the libsodium-php extension.",
+                "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
+                "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations.",
+                "ext-xml": "Install the XML extension to load XML formatted public keys."
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "phpseclib/bootstrap.php"
+                ],
+                "psr-4": {
+                    "phpseclib\\": "phpseclib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jim Wigginton",
+                    "email": "terrafrost@php.net",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Patrick Monnerat",
+                    "email": "pm@datasphere.ch",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Andreas Fischer",
+                    "email": "bantu@phpbb.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Hans-Jürgen Petrich",
+                    "email": "petrich@tronic-media.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Graham Campbell",
+                    "email": "graham@alt-three.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP Secure Communications Library - Pure-PHP implementations of RSA, AES, SSH2, SFTP, X.509 etc.",
+            "homepage": "http://phpseclib.sourceforge.net",
+            "keywords": [
+                "BigInteger",
+                "aes",
+                "asn.1",
+                "asn1",
+                "blowfish",
+                "crypto",
+                "cryptography",
+                "encryption",
+                "rsa",
+                "security",
+                "sftp",
+                "signature",
+                "signing",
+                "ssh",
+                "twofish",
+                "x.509",
+                "x509"
+            ],
+            "support": {
+                "issues": "https://github.com/phpseclib/phpseclib/issues",
+                "source": "https://github.com/phpseclib/phpseclib/tree/2.0.47"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/terrafrost",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/phpseclib",
+                    "type": "patreon"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/phpseclib/phpseclib",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-02-26T04:55:38+00:00"
+        },
+        {
             "name": "qsnh/think-log-viewer",
             "version": "v1.0.1",
             "source": {
@@ -73,7 +195,13 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/Qsnh/think-log-viewer/zipball/4fdbb4c7e6036fa5169edca390cb6af62f766e12",
                 "reference": "4fdbb4c7e6036fa5169edca390cb6af62f766e12",
-                "shasum": ""
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "php": "^7.0"
@@ -83,12 +211,12 @@
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Qsnh\\Think\\Log\\": "./src"
-                },
                 "files": [
                     "autoload.php"
-                ]
+                ],
+                "psr-4": {
+                    "Qsnh\\Think\\Log\\": "./src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -109,17 +237,23 @@
         },
         {
             "name": "topthink/framework",
-            "version": "v5.1.41",
+            "version": "v5.1.42",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/framework.git",
-                "reference": "7137741a323a4a60cfca334507cd1812fac91bb2"
+                "reference": "ecf1a90d397d821ce2df58f7d47e798c17eba3ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/framework/zipball/7137741a323a4a60cfca334507cd1812fac91bb2",
-                "reference": "7137741a323a4a60cfca334507cd1812fac91bb2",
-                "shasum": ""
+                "url": "https://api.github.com/repos/top-think/framework/zipball/ecf1a90d397d821ce2df58f7d47e798c17eba3ad",
+                "reference": "ecf1a90d397d821ce2df58f7d47e798c17eba3ad",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "php": ">=5.6.0",
@@ -158,9 +292,9 @@
             ],
             "support": {
                 "issues": "https://github.com/top-think/framework/issues",
-                "source": "https://github.com/top-think/framework/tree/v5.1.41"
+                "source": "https://github.com/top-think/framework/tree/v5.1.42"
             },
-            "time": "2021-01-11T02:51:29+00:00"
+            "time": "2022-10-25T15:04:49+00:00"
         },
         {
             "name": "topthink/think-captcha",
@@ -174,19 +308,25 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/top-think/think-captcha/zipball/54c8a51552f99ff9ea89ea9c272383a8f738ceee",
                 "reference": "54c8a51552f99ff9ea89ea9c272383a8f738ceee",
-                "shasum": ""
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "topthink/framework": "5.1.*"
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "think\\captcha\\": "src/"
-                },
                 "files": [
                     "src/helper.php"
-                ]
+                ],
+                "psr-4": {
+                    "think\\captcha\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -217,7 +357,13 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/top-think/think-installer/zipball/38ba647706e35d6704b5d370c06f8a160b635f88",
                 "reference": "38ba647706e35d6704b5d370c06f8a160b635f88",
-                "shasum": ""
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "composer-plugin-api": "^1.0||^2.0"
@@ -252,22 +398,33 @@
         },
         {
             "name": "workerman/gateway-worker",
-            "version": "v3.0.22",
+            "version": "v3.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/walkor/GatewayWorker.git",
-                "reference": "a615036c482d11f68b693998575e804752ef9068"
+                "reference": "c1552dd9fec670ecf8d5db9bfaf61e1821636f32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/walkor/GatewayWorker/zipball/a615036c482d11f68b693998575e804752ef9068",
-                "reference": "a615036c482d11f68b693998575e804752ef9068",
-                "shasum": ""
+                "url": "https://api.github.com/repos/walkor/GatewayWorker/zipball/c1552dd9fec670ecf8d5db9bfaf61e1821636f32",
+                "reference": "c1552dd9fec670ecf8d5db9bfaf61e1821636f32",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
-                "workerman/workerman": ">=3.5.0"
+                "workerman/workerman": "^4.0.0"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "GatewayWorker\\": "./src"
@@ -284,7 +441,7 @@
             ],
             "support": {
                 "issues": "https://github.com/walkor/GatewayWorker/issues",
-                "source": "https://github.com/walkor/GatewayWorker/tree/v3.0.22"
+                "source": "https://github.com/walkor/GatewayWorker/tree/v3.1.5"
             },
             "funding": [
                 {
@@ -296,7 +453,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2021-12-23T13:13:09+00:00"
+            "time": "2023-12-27T12:36:59+00:00"
         },
         {
             "name": "workerman/gateway-worker-for-win",
@@ -310,7 +467,13 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/walkor/GatewayWorker-for-win/zipball/ea75b5d581db1762e9928f5729200a1abcaba496",
                 "reference": "ea75b5d581db1762e9928f5729200a1abcaba496",
-                "shasum": ""
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "workerman/workerman-for-win": ">=3.1.8"
@@ -338,20 +501,26 @@
         },
         {
             "name": "workerman/workerman",
-            "version": "v4.0.26",
+            "version": "v4.1.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/walkor/workerman.git",
-                "reference": "27573e9f985f9ec0665b1f9924308d359bd0fdaa"
+                "reference": "afc8242fc769ab7cf22eb4ac22b97cb59d465e4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/walkor/workerman/zipball/27573e9f985f9ec0665b1f9924308d359bd0fdaa",
-                "reference": "27573e9f985f9ec0665b1f9924308d359bd0fdaa",
-                "shasum": ""
+                "url": "https://api.github.com/repos/walkor/workerman/zipball/afc8242fc769ab7cf22eb4ac22b97cb59d465e4e",
+                "reference": "afc8242fc769ab7cf22eb4ac22b97cb59d465e4e",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
-                "php": ">=5.3"
+                "php": ">=7.0"
             },
             "suggest": {
                 "ext-event": "For better performance. "
@@ -389,7 +558,7 @@
             },
             "funding": [
                 {
-                    "url": "https://opencollective.com/walkor",
+                    "url": "https://opencollective.com/workerman",
                     "type": "open_collective"
                 },
                 {
@@ -397,7 +566,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2021-12-21T03:39:14+00:00"
+            "time": "2024-02-19T02:10:39+00:00"
         },
         {
             "name": "workerman/workerman-for-win",
@@ -411,7 +580,13 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/walkor/workerman-for-win/zipball/cbaae3193e4567fd9cfc8099931c63d9b12174ee",
                 "reference": "cbaae3193e4567fd9cfc8099931c63d9b12174ee",
-                "shasum": ""
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "php": ">=5.3"
@@ -451,17 +626,23 @@
         },
         {
             "name": "zoujingli/ip2region",
-            "version": "v1.0.10",
+            "version": "v1.0.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zoujingli/ip2region.git",
-                "reference": "453480d0ab5b6fdbdf4aa400b7598a10ff2dc5c0"
+                "reference": "c02c74571ad665745e57db5d04efa165e543fade"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zoujingli/ip2region/zipball/453480d0ab5b6fdbdf4aa400b7598a10ff2dc5c0",
-                "reference": "453480d0ab5b6fdbdf4aa400b7598a10ff2dc5c0",
-                "shasum": ""
+                "url": "https://api.github.com/repos/zoujingli/ip2region/zipball/c02c74571ad665745e57db5d04efa165e543fade",
+                "reference": "c02c74571ad665745e57db5d04efa165e543fade",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "php": ">=5.3"
@@ -490,9 +671,9 @@
             ],
             "support": {
                 "issues": "https://github.com/zoujingli/ip2region/issues",
-                "source": "https://github.com/zoujingli/ip2region/tree/v1.0.10"
+                "source": "https://github.com/zoujingli/ip2region/tree/v1.0.13"
             },
-            "time": "2021-03-23T10:29:05+00:00"
+            "time": "2023-03-13T05:18:05+00:00"
         }
     ],
     "packages-dev": [],

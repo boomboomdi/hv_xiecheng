@@ -28,17 +28,26 @@
                                            autocomplete="off" class="layui-input" value="{$writeOff['write_off_sign']}">
                                 </div>
                             </div>
-<!--                            <div class="layui-col-lg6">-->
-<!--                                <label class="layui-form-label">账号：</label>-->
-<!--                                <div class="layui-input-block">-->
-<!--                                    <input type="text" name="write_off_username" placeholder="" autocomplete="off"-->
-<!--                                           class="layui-input" value="{$writeOff['write_off_username']}">-->
-<!--                                </div>-->
-<!--                            </div>-->
+
                             <div class="layui-col-lg6">
-                                <label class="layui-form-label">协议密钥：</label>
+                                <label class="layui-form-label">商户id：</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="token" lay-verify="required" placeholder="协议密匙"
+                                    <input type="text" name="merhant_id" lay-verify="required"
+                                           value="{$writeOff['merhant_id']}"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-col-lg6">
+                                <label class="layui-form-label">核商密钥：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="secret_key" lay-verify="required" placeholder=""
+                                           autocomplete="off" class="layui-input" value="{$writeOff['secret_key']}">
+                                </div>
+                            </div>
+                            <div class="layui-col-lg6">
+                                <label class="layui-form-label">签名密钥：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="token" placeholder=""
                                            autocomplete="off" class="layui-input" value="{$writeOff['token']}">
                                 </div>
                             </div>

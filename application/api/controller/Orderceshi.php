@@ -4,6 +4,7 @@ namespace app\api\controller;
 
 
 use app\admin\model\WriteoffModel;
+use app\common\model\CamiChannelModel;
 use app\api\validate\OrderhexiaoValidate;
 use app\common\model\OrderexceptionModel;
 use app\common\model\SystemConfigModel;
@@ -17,17 +18,63 @@ use think\facade\Config;
 
 class Orderceshi extends Controller
 {
+    public function aa()
+    {
+
+    }
 
     public function getAppName()
     {
-        dump(Config::get('app.'));
+//        dump(Config::get('app.'));
+        $data = array(
+            array(
+                'id' => 1,
+                'name' => '张三',
+                'weight' => 5
+            ),
+            array(
+                'id' => 2,
+                'name' => '王五',
+                'weight' => 10
+            ),
+            array(
+                'id' => 3,
+                'name' => '李四',
+                'weight' => 15
+            ),
+        );
+        $weight = 0;
+        $tempdata = array();
+        foreach ($data as $one) {
+            $weight += $one['weight'];
+            for ($i = 0; $i < $one['weight']; $i++) {
+                $tempdata[] = $one;
+            }
+        }
+        $use = rand(0, $weight - 1);
+        $one = $tempdata[$use];
+        var_dump($one);
+        exit;
+//        $demo11 = randomByWeight();
+//        var_dump($demo11);exit;
+    }
+
+    public function getUseChannel()
+    {
+        $camiChannelModel = new CamiChannelModel();
+
+        $searchCamiData['cami_type_sign'] = "Walmart";
+        $data = $camiChannelModel->getUseCamiChannel($searchCamiData);
+        var_dump($data);
+        exit;
     }
 
     public function getOrderHxLockTime()
     {
 
         $orderHxLockTime = SystemConfigModel::getOrderHxLockTime();
-        var_dump($orderHxLockTime);exit;
+        var_dump($orderHxLockTime);
+        exit;
     }
 
     public function ceshiAdd()

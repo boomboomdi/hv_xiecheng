@@ -10,7 +10,9 @@
 // +----------------------------------------------------------------------
 
 // 应用公共文件
+use phpseclib\Crypt\AES;
 use tool\Auth;
+
 
 /**
  * 生产密码
@@ -531,4 +533,95 @@ function validateURL($URL)
         return false;
     }
 }
+
+/**
+ * 权重随机工具类
+ * User: leyangjun
+ * Date: 2018/9/1
+ * Time: 上午10:37
+ */
+
+/**
+ * 根据全权重随机分配
+ * @param array $weight
+ * @demo randomByWeight(['le' => 1000, 'yang' => 200, 'jun' => 800])
+ * @return int|string
+ */
+function randomByWeight($weight = array())
+{
+    $randomVal = rand(1, array_sum($weight));
+
+    $tmpWeight = 0;
+    $randomNum = 0;
+
+    foreach ($weight as $k => $v) {
+        $min = $tmpWeight;
+        $tmpWeight += $v;
+        $max = $tmpWeight;
+
+        if ($randomVal > $min && $randomVal <= $max) {
+            $randomNum = $k;
+            break;
+        }
+    }
+
+    return $randomNum;
+}
+
+$data = array(
+    array(
+        'id' => 1,
+        'name' => '张三',
+        'weight' => 5
+    ),
+    array(
+        'id' => 2,
+        'name' => '王五',
+        'weight' => 10
+    ),
+    array(
+        'id' => 3,
+        'name' => '李四',
+        'weight' => 15
+    ),
+);
+/**
+ * 根据全权重随机分配
+ * @param array $weight
+ * @demo randomByWeight$data =
+ * $data = array(
+ *              array(
+ *                  'id' => 1,
+ *                  'name' => '张三',
+ *                  'weight' => 5
+ *              ),
+ *              array(
+ *                  'id' => 2,
+ *                  'name' => '王五',
+ *                  'weight' => 10
+ *              ),
+ *              array(
+ *                  'id' => 3,
+ *                  'name' => '李四',
+ *                  'weight' => 15
+ *              ),
+ *         );
+ * @return int|string
+ */
+function randomCamiChannelByWeight($data)
+{
+
+    $weight = 0;
+    $tempdata = array();
+    foreach ($data as $one) {
+        $weight += $one['weight'];
+        for ($i = 0; $i < $one['weight']; $i++) {
+            $tempdata[] = $one;
+        }
+    }
+    $use = rand(0, $weight - 1);
+    $one = $tempdata[$use];
+    return $one;
+}
+
 

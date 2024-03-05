@@ -23,7 +23,7 @@ class OrderinfoValidate extends Validate
         'merchant_sign.max' => 'merchant_sign format error',
         'order_no.require' => 'require order_no',
         'order_no.max' => 'order_no format error',
-        'payment.require' => 'require number',
+        'payment.require' => 'require payment',
         'notify_url.require' => 'require notify_url',
         'amount.require' => 'require amount',
         'amount.float' => 'amount format float',

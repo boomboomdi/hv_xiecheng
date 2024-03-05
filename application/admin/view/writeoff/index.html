@@ -35,7 +35,7 @@
         <div class="layui-card-body">
             {if (buttonAuth('writeoff/addwriteoff'))}
             <div style="padding-bottom: 10px;">
-                <button class="layui-btn layuiadmin-btn-admin" data-type="add"><i class="layui-icon">&#xe654;</i> 添加
+                <button class="layui-btn layuiadmin-btn-admin" data-type="add"><i class="layui-icon">&#xe654;</i> 添加核销商
                 </button>
             </div>
             {/if}
@@ -48,22 +48,23 @@
                 {{#  } }}
             </script>
             <script type="text/html" id="table-seller-admin">
-                {if (buttonAuth('writeoff/stoporderhx'))}
-                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="stoporderhx"><i class="layui-icon layui-icon-delete"></i>批量止付</a>
-                {/if}
+
                 {if (buttonAuth('writeoff/editwriteoff'))}
                 <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i
                         class="layui-icon layui-icon-edit"></i>编辑</a>
                 {/if}
-
-                {if (buttonAuth('writeoff/delwriteoff'))}
-                {{#  if(d.admin_id == '1'){ }}
-                <a class="layui-btn layui-btn-disabled layui-btn-xs"><i class="layui-icon layui-icon-delete"></i>删除</a>
-                {{#  } else { }}
-                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i
-                        class="layui-icon layui-icon-delete"></i>删除</a>
-                {{#  } }}
+                {if (buttonAuth('writeoff/addwriteoffamount'))}
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="addwriteoffamount"><i
+                        class="layui-icon layui-icon-denger"></i>添加余额</a>
                 {/if}
+                <!--                {if (buttonAuth('writeoff/delwriteoff'))}-->
+                <!--                {{#  if(d.admin_id == '1'){ }}-->
+                <!--                <a class="layui-btn layui-btn-disabled layui-btn-xs"><i class="layui-icon layui-icon-delete"></i>删除</a>-->
+                <!--                {{#  } else { }}-->
+                <!--                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i-->
+                <!--                        class="layui-icon layui-icon-delete"></i>删除</a>-->
+                <!--                {{#  } }}-->
+                <!--                {/if}-->
             </script>
         </div>
     </div>
@@ -111,28 +112,31 @@
         layTool.table("#LAY-user-table", "/admin/writeoff/index", [
             [{
                 field: "write_off_sign",
-                title: "核商标识",
+                title: "服务商标识",
+            }, {
+                field: "merhant_id",
+                title: "商户ID",
+            }, {
+                field: "secret_key",
+                title: "服务商密钥",
+            }, {
+                field: "write_off_deposit",
+                title: "余额",
             }, {
                 field: "token",
-                title: "核商密钥",
+                title: "签名密钥",
             }, {
                 field: "orderTotalNum",
-                title: "推单总数",
+                title: "订单总数",
             }, {
                 field: "totalOrderAmount",
-                title: "总推单总额",
+                title: "金额总额",
             }, {
                 field: "totalPayOrderAmount",
                 title: "总支付金额",
             }, {
                 field: "totalPayOrderAmountNum",
                 title: "总支付数量",
-            }, {
-                field: "noUseOrderAmountNum",
-                title: "未使用数量",
-            }, {
-                field: "canOrderAmountNum",
-                title: "可用单量",
             }, {
                 field: "status",
                 title: "状态",
@@ -158,7 +162,7 @@
                     if ("del" === e.event) {
 
                         layer.ready(function () {
-                            var index = layer.confirm('您确定要删除该管理员？', {
+                            var index = layer.confirm('您确定要删除该核销？', {
                                 title: '友情提示',
                                 icon: 3,
                                 btn: ['确定', '取消']
@@ -183,8 +187,8 @@
                     } else if ("edit" === e.event) {
 
                         layTool.open("/admin/writeoff/editWriteoff/write_off_id/" + e.data.write_off_id, "编辑核销", '50%', '50%');
-                    } else if ("stoporderhx" === e.event) {
-                        layTool.open("/admin/writeoff/stoporderhx/write_off_id/" + e.data.write_off_id, "编辑核销", '50%', '50%');
+                    } else if ("addwriteoffamount" === e.event) {
+                        layTool.open("/admin/writeoff/addwriteoffamount/write_off_id/" + e.data.write_off_id, "更新余额", '50%', '50%');
                     }
                 });
         });

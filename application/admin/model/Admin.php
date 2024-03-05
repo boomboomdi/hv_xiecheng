@@ -26,7 +26,8 @@ class Admin extends Model
 
         try {
 
-            $res = $this->field($prefix . 'admin.*,' . $prefix . 'role.role_name')->where($where)
+            $res = $this->field($prefix . 'admin.*,' . $prefix . 'role.role_name')
+                ->where($where)
                 ->leftJoin($prefix . 'role', $prefix . 'admin.role_id = ' . $prefix . 'role.role_id')
                 ->order('admin_id', 'desc')->paginate($limit);
 
