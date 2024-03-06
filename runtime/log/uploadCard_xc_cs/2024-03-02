@@ -1,2 +1,0 @@
-2024-03-02 05:44:18 '{"uploadData":{"cardList":[{"cardName":"0aaa","cardPass":"3456"},{"cardName":"1aaa","cardPass":"3456"},{"cardName":"2aaa","cardPass":"3456"}],"notifyUrl":"http:\\/\\/localhost\\/test","timestamp":1681735480158,"sign":"17f9ceb6124a84f34ece9a9aaaf366cd"},"response":{"code":200,"data":{"uploadId":72451},"msg":"\\u8bf7\\u6c42\\u6210\\u529f","traceId":"d2d17835e09841bd844ff30a14a1fb39"}}'
-
