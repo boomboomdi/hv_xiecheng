@@ -437,6 +437,17 @@ class Orderinfo extends Controller
 
                 $response = file_get_contents($url, false, stream_context_create($options));
 
+                $responseData = json_decode($response, true);
+
+                $updateData2['upload_status'] = 1;
+                $updateData2['check_result'] = $responseData['msg'];
+                $updateData2['order_pay'] = $responseData['traceId'];
+                $updateData2['account'] = $responseData['data']['uploadId'];
+                $updateData2['upload_time'] = time();
+                if ($responseData['code'] != 200) {
+                    $updateData2['upload_status'] = 2;
+                }
+                $update2 = $orderModel->where($where)->update($updateData2);
                 logs(json_encode(['message' => $param, 'uploadData' => $objectMap, 'response' => $response]), 'uploadCard_xc_fist');
                 //请求核销通道
 

@@ -29,7 +29,7 @@ class Cardinfo extends Controller
 {
 
     /**
-     * 正式入口/卡密正式路口
+     * 携程卡密上传回调
      * @param Request $request
      * @return void
      */
