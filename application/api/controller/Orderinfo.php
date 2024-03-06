@@ -443,11 +443,14 @@ class Orderinfo extends Controller
                 $updateData2['check_result'] = $responseData['msg'];
                 $updateData2['order_pay'] = $responseData['traceId'];
                 $updateData2['account'] = $responseData['data']['uploadId'];
-                $updateData2['upload_time'] = time();
+                $updateData2['upload_time'] = date("Y-m-d H:i:s", time());
                 if ($responseData['code'] != 200) {
                     $updateData2['upload_status'] = 2;
                 }
                 $update2 = $orderModel->where($where)->update($updateData2);
+                if (!$update2) {
+                    return apiJsonReturn(-5, "提交失败，请重新下单提交！");
+                }
                 logs(json_encode(['message' => $param, 'uploadData' => $objectMap, 'response' => $response]), 'uploadCard_xc_fist');
                 //请求核销通道
 

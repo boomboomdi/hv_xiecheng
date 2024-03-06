@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 <div class="layui-inline">
-                    <label class="layui-form-label">匹配帐号</label>
+                    <label class="layui-form-label">上传id</label>
                     <div class="layui-input-block">
                         <input type="text" name="account" placeholder="请输入" autocomplete="off" class="layui-input">
                     </div>
@@ -146,11 +146,11 @@
                 field: "order_me",
                 title: "平台单号",
             }, {
-                field: "account",
-                title: "匹配帐号",
+                field: "order_pay",
+                title: "核销单号",
             }, {
                 field: "operator",
-                title: "运营商",
+                title: "卡种",
             }, {
                 field: "amount",
                 title: "订单金额",
@@ -162,15 +162,12 @@
                 title: "下单时间",
                 align: "center",
                 width: 170,
+            },{
+                field: "account",
+                title: "上传ID",
             }, {
-                field: "pay_name",
-                title: "选择方式",
-            }, {
-                field: "click_time",
-                title: "点击时间",
-            }, {
-                field: "next_check_time",
-                title: "下次查询",
+                field: "upload_time",
+                title: "上传时间",
             }, {
                 field: "pay_time",
                 title: "支付时间"

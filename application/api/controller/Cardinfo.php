@@ -11,10 +11,12 @@ use app\common\model\CamiChannelModel;
 use app\common\model\OrderhexiaoModel;
 use app\common\model\OrderModel;
 use app\api\validate\OrderinfoValidate;
+use app\api\validate\NotifycardValidate;
 use app\api\validate\CheckPhoneAmountNotifyValidate;
 use think\Request;
 use app\common\model\SystemConfigModel;
 use app\common\model\OrderoperateLog;
+use phpseclib\Crypt\AES;
 
 use tool\Log;
 use think\Validate;
@@ -37,21 +39,31 @@ class Cardinfo extends Controller
     {
 
         $data = @file_get_contents('php://input');
-        $message = json_decode($data, true);
-        logs(json_encode(['message' => $message, 'line' => $message]), 'order_fist');
         $db = new Db();
         try {
-            logs(json_encode(['message' => $message, 'line' => $message]), 'order_fist');
+            logs(json_encode(['message' => $data]), 'cardUploadNotify_fist');
+
+            $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
+            $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
+            $cipher = new AES(1);
+            $cipher->setKey($encryptPassword);
+            $decryptedData = $cipher->decrypt($data);
+
+            $param = gzdecode($decryptedData);
+
+
+            logs(json_encode(['decryptedData' => $param, 'param' => $param]), 'cardUploadNotify_log2');
             $validate = new OrderinfoValidate();
-            if (!$validate->check($message)) {
+            if (!$validate->check($param)) {
                 return apiJsonReturn(-1, '', $validate->getError());
             }
+
             $db = new Db();
             //merchant_sign  //商户标识
-            $token = $db::table('bsa_merchant')->where('merchant_sign', '=', $message['merchant_sign'])->find()['token'];
-            if (empty($token)) {
-                return apiJsonReturn(-2, "商户验证失败！");
-            }
+//            $token = $db::table('bsa_merchant')->where('merchant_sign', '=', $message['merchant_sign'])->find()['token'];
+//            if (empty($token)) {
+//                return apiJsonReturn(-2, "商户验证失败！");
+//            }
 //            $sig = md5($message['merchant_sign'] . $message['order_no'] . $message['amount'] . $message['time'] . $token);
 //
 //
@@ -59,9 +71,9 @@ class Cardinfo extends Controller
 //                logs(json_encode(['orderParam' => $message, 'doMd5' => $sig]), 'orderParamSignFail');
 //                return apiJsonReturn(-3, "验签失败！");
 //            }
-            $orderFind = $db::table('bsa_order')->where('order_no', '=', $message['order_no'])->count();
-            if ($orderFind > 0) {
-                return apiJsonReturn(-4, "order_no existed 订单号单号重复！");
+            $orderFind = $db::table('bsa_order')->where('uploadId', '=', $param['uploadId'])->count();
+            if (empty($orderFind)) {
+                return apiJsonReturn(-1, "uploadId no existed 订单不存在！");
             }
 
             // 根据user_id  未付款次数 限制下单 end
