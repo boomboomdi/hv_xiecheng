@@ -451,7 +451,7 @@ class Orderinfo extends Controller
                 if (!$update2) {
                     return apiJsonReturn(-5, "提交失败，请重新下单提交！");
                 }
-                logs(json_encode(['message' => $param, 'uploadData' => $objectMap, 'response' => $response]), 'uploadCard_xc_fist');
+                logs(json_encode(['message' => $param, 'uploadData' => $objectMap, 'response' => $responseData]), 'uploadCard_xc_fist');
                 //请求核销通道
 
                 return apiJsonReturn(0, "提交成功，请稍后！");
