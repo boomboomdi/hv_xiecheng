@@ -401,7 +401,7 @@ class Orderinfo extends Controller
                 $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
                 $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
                 $url = "http://114.67.177.36:38088/uploadCard";
-                $notifyUrl = $request->domain() . "/api/orderinfo/getorderinfo";;
+                $notifyUrl = $request->domain() . "/api/cardinfo/cardUploadNotify";;
 //        {"cardList":[{"cardName":"0aaa","cardPass":"3456"}],"notifyUrl":"http://localhost/test","timestamp":1681735480158}
                 // 创建有序字典
                 $objectMap = array();
