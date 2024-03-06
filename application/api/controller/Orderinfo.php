@@ -15,7 +15,6 @@ use app\api\validate\OrderinfoValidate;
 use app\api\validate\CheckPhoneAmountNotifyValidate;
 use think\Request;
 use app\common\model\SystemConfigModel;
-use app\common\model\OrderoperateLog;
 
 use tool\Log;
 use think\Validate;
@@ -207,6 +206,7 @@ class Orderinfo extends Controller
             //修改订单状态 //下单成功
             $successOrderWhere['order_me'] = $insertOrderData['order_me'];
             $successOrderUpdate['order_status'] = 4;  //下单成功-等待访问
+            $successOrderUpdate['rate'] = $useCamiChannelData['rate'];  //费率
             $successOrderUpdate['write_off_sign'] = $bsaWriteOff['write_off_sign'];   //匹配核销单核销商标识
             $orderLimitTime = SystemConfigModel::getOrderLockTime();
             $successOrderUpdate['order_limit_time'] = (time() + $orderLimitTime);  //订单表 $orderLimitTime
