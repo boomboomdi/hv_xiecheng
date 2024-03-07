@@ -159,12 +159,12 @@ class Checkorder extends Command
                             $db::rollback();
                         }
                     }
-
                     //修改订单状态
                     $updateOrderStatus = $db::table("bsa_order")->where($updateCheckWhere)
                         ->update($updateCheckData);
                     if (!$updateOrderStatus) {
-                        logs(json_encode([
+                        logs(json_encode([+
+
                             'action' => 'updateMatch',
                             'updateOrderWhere' => $updateCheckWhere,
                             'updateCheckData' => $updateCheckData,
