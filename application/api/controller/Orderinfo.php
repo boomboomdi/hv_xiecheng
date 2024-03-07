@@ -379,7 +379,7 @@ class Orderinfo extends Controller
             //查询订单状态
             $orderData = $orderModel->where($where)->find();
             if (empty($orderData)) {
-                return apiJsonReturn(-1, "上传无此订单！");
+                return json(['code' => -1, 'msg' => '上传无此订单！', 'data' => []]);
             }
             if (!empty($orderData['cami_account'])) {
                 return json(['code' => -3, 'msg' => '订单正在正在核销中，请勿重新提交！', 'data' => []]);
