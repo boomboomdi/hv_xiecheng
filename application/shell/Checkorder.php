@@ -112,7 +112,7 @@ class Checkorder extends Command
                         ]), 'checkorder_cami_different_log');
                     }
                     //待充值, 充值中  是可再查询状态
-                    if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $responseData['data']['state'] == '充值中')) {
+                    if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $cardDta['state'] == '充值中')) {
                         $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
                     }
                     //充值失败
