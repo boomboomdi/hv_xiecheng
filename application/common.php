@@ -399,16 +399,86 @@ function curlPostJson($url = '', $postData = '', $options = array())
     return $data;
 }
 
+function curlGettJson($url = '', $postData = '', $options = array())
+{
+    if (is_array($postData)) {
+        $postData = json_encode($postData);
+    }
+
+    $ch = curl_init();
+    $headers = [
+        "Content-Type: application/json;charset=UTF-8",
+    ];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30); //设置cURL允许执行的最长秒数
+    if (!empty($options)) {
+        curl_setopt_array($ch, $options);
+    }
+    //https请求 不验证证书和host
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return $data;
+}
+
 function httpGET2($url, $headers)
 {
+
     $curl = curl_init();
 
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HEADER, 1);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $data = curl_exec($curl);
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+        CURLOPT_HTTPHEADER => $headers,
+    ));
+
+    $response = curl_exec($curl);
+
     curl_close($curl);
+    echo $response;
+
+}
+
+/**
+ * curl
+ * @param $url
+ * @param null $post_fields
+ * @param null $headers
+ * @return bool|string
+ */
+function cUrlGetData($url, $post_fields = null, $headers = null)
+{
+    $ch = curl_init();
+    $timeout = 15;
+    curl_setopt($ch, CURLOPT_URL, $url);
+    if ($post_fields && !empty($post_fields)) {
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
+    }
+    if ($headers && !empty($headers)) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+    $data = curl_exec($ch);
+    /*if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }*/
+    curl_close($ch);
     return $data;
 }
 
