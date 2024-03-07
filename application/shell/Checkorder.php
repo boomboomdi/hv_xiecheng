@@ -67,8 +67,8 @@ class Checkorder extends Command
 
 
                     $response = httpGET2($url, $headers);
-//                    $response = file_get_contents($url, false, stream_context_create($options));
 
+                    logs(json_encode(['orderNo' => $v['order_no'], 'uploadId' => $v['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $response]), 'checkorder_xc1_log');
 
                     $responseData = json_decode($response, true);
 
