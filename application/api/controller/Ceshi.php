@@ -20,6 +20,21 @@ use phpseclib\Crypt\AES;
 
 class Ceshi extends Controller
 {
+
+    public function cc()
+    {
+        $aaa = array();
+        for ($i = 0; $i < 3; ++$i) {
+            $aaa[] = $i;
+        }
+        foreach ($aaa as $k => $v){
+            if($v){
+
+            }
+
+        }
+    }
+
     public function bb()
     {
         $appKey = "qG4UnbXxzgxdI6VU";

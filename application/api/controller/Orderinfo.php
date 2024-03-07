@@ -148,30 +148,29 @@ class Orderinfo extends Controller
                 ->find();
             if (!$bsaWriteOff) {
                 $db::rollback();
+                $failOrderWhere['order_me'] = $insertOrderData['order_me'];
+                $failOrderUpdate['order_status'] = 3;  //下单失败-等待访问
+                $failOrderUpdate['order_desc'] = "下单失败，无可匹配核销商-201";  //下单失败
+                $db::table("bsa_order")->where($failOrderWhere)->update($failOrderUpdate);
                 return apiJsonReturn(-201, "无可匹配订单！");
             }
-
 
             //更新核销商金额
             //冻结金额
             $freezeAmount = ($insertOrderData['amount'] * (1 - $useCamiChannelData['rate']));
-//            $updateWriteData['freeze_amount'] = bcadd($bsaWriteOff['freeze_amount'], $freezeAmount, 3); //冻结金额增加
-//            $updateWriteData['use_amount'] = bcsub($bsaWriteOff['write_off_deposit'], $freezeAmount, 3); //可用金额减少
-//            var_dump((1 - $useCamiChannelData['rate']));
-//            var_dump($freezeAmount);
-//            exit;
             $writeOffModel = new WriteoffModel();
-//            $updateWriteOff = $writeOffModel
-//                ->where('write_off_id', '=', $useCamiChannelData['write_off_id'])
-//                ->setDec('use_amount', $freezeAmount);
-//            $updateWriteOff1 = $writeOffModel
-//                ->where('write_off_id', '=', $useCamiChannelData['write_off_id'])
-//                ->setDec('use_amount', $freezeAmount);
             $updateWriteOff = $writeOffModel
-                ->execute("UPDATE bsa_write_off  SET use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " , freeze_amount = freeze_amount + " . (number_format($freezeAmount, 3)) . "  WHERE  write_off_id = " . $useCamiChannelData['write_off_id']);
+                ->execute("UPDATE bsa_write_off  SET 
+                           use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,
+                           freeze_amount = freeze_amount + " . (number_format($freezeAmount, 3)) . " 
+                         WHERE  write_off_id = " . $useCamiChannelData['write_off_id']);
 //            var_dump($updateWriteOff);exit;
             if ($updateWriteOff != 1) {
                 $db::rollback();
+                $failOrderWhere['order_me'] = $insertOrderData['order_me'];
+                $failOrderUpdate['order_status'] = 3;  //下单失败-等待访问
+                $failOrderUpdate['order_desc'] = "下单失败，更新核销商金额有误！-203";
+                $db::table("bsa_order")->where($failOrderWhere)->update($failOrderUpdate);
                 logs(json_encode([
                     'action' => 'updateMatch',
                     'updateCamiChannelWhere' => $useCamiChannelData['write_off_id'],
@@ -209,7 +208,8 @@ class Orderinfo extends Controller
             $successOrderUpdate['rate'] = $useCamiChannelData['rate'];  //费率
             $successOrderUpdate['write_off_sign'] = $bsaWriteOff['write_off_sign'];   //匹配核销单核销商标识
             $orderLimitTime = SystemConfigModel::getOrderLockTime();
-            $successOrderUpdate['order_limit_time'] = (time() + $orderLimitTime);  //订单表 $orderLimitTime
+            $successOrderUpdate['order_limit_time'] = (time() + $orderLimitTime);  //订单表 $orderLimitTime 订单限制展示时间
+            $successOrderUpdate['limit_time'] = (time() + $orderLimitTime);  //订单表 订单冻结回调时间
             $successOrderUpdate['operator'] = $useCamiChannelData['cami_type_sign']; //移动联通电信  /沃尔玛京东E卡。。。
             $successOrderUpdate['qr_url'] = $url; //支付订单
             $successOrderUpdate['order_desc'] = "等待访问!"; //订单描述

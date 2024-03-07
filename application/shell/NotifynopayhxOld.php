@@ -13,7 +13,7 @@ use app\common\model\SystemConfigModel;
 use app\common\model\NotifylogModel;
 use think\Db;
 
-class Notifynopayhx extends Command
+class NotifynopayhxOld extends Command
 {
     protected function configure()
     {
