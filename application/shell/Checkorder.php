@@ -73,7 +73,7 @@ class Checkorder extends Command
                     $responseData = json_decode($response, true);
 
                     Log::OrderLog('订单查询', $v['order_no'], var_export($responseData, true));
-                    logs(json_encode(['orderNo' => $v['order_no'], 'uploadId' => $v['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $response]), 'checkorder_xc_log');
+                    logs(json_encode(['orderNo' => $v['order_no'], 'uploadId' => $v['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $responseData]), 'checkorder_xc_log');
 //                            {
 //                                "code": 200,
 //                                "data": [
@@ -102,7 +102,8 @@ class Checkorder extends Command
                      *         2、充值失败   是不可再查询状态
                      *         3、充值成功   是不可再查询状态
                      */
-                    if (isset($responseData['data']['cardName']) && $responseData['data']['cardName'] != $val['cami_account']) {
+                    $cardDta = $responseData['data'][0];
+                    if (isset($cardDta['cardName']) && $cardDta['cardName'] != $val['cami_account']) {
                         logs(json_encode(['orderNo' => $v['order_no'],
                             'uploadId' => $v['account'],
                             'data' => $responseData['data'],
@@ -111,18 +112,18 @@ class Checkorder extends Command
                         ]), 'checkorder_cami_different_log');
                     }
                     //待充值, 充值中  是可再查询状态
-                    if ($responseData['data']['state'] == '待充值' || $responseData['data']['state'] == '充值中') {
+                    if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $responseData['data']['state'] == '充值中')) {
                         $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
                     }
                     //充值失败
                     //查询状态变更为不可查询状态   check_status =2
-                    if ($responseData['data']['state'] == '充值失败') {
+                    if (isset($cardDta['state']) && $cardDta['state'] == '充值失败') {
                         $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
                     }
 
                     //充值成功
                     $db::startTrans();
-                    if ($responseData['data']['state'] == '充值成功！') {
+                    if (isset($cardDta['state']) && $cardDta['state'] == '充值成功') {
                         //
                         //修改订单状态  == = = = 成功
                         $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
