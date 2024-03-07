@@ -91,7 +91,7 @@ class Checkorder extends Command
                      * 查询失败
                      */
                     //查询失败
-                    $updateCheckData['check_result'] = var_export($responseData, true);
+                    $updateCheckData['check_result'] = serialize(var_export($responseData, true));
                     if ($responseData['code'] != 200 || empty($responseData['data']) || !isset($responseData['data']['state'])) {
                         $updateCheckData['check_status'] = 0;  //查询失败
                         $updateCheckData['next_check_time'] = time() + 20;  //查询失败
