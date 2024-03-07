@@ -14,7 +14,6 @@ use think\Db;
 class SystemConfigModel extends Model
 {
 
-
     /**
      * 订单冻结期
      * @return int

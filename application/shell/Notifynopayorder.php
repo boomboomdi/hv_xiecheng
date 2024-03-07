@@ -82,7 +82,7 @@ class Notifynopayorder extends Command
                                 ->execute("UPDATE bsa_write_off  
                                          SET use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
                                              freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
-                                         WHERE  write_off_sign = " . $v['write_off_sign']);
+                                         WHERE  write_off_id = " . $writeOffData['write_off_id']);
 
                             if (!$updateWriteOff) {
                                 $changeOrderDoNotify = true;

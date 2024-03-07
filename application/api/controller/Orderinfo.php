@@ -164,7 +164,6 @@ class Orderinfo extends Controller
                            use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,
                            freeze_amount = freeze_amount + " . (number_format($freezeAmount, 3)) . " 
                          WHERE  write_off_id = " . $useCamiChannelData['write_off_id']);
-//            var_dump($updateWriteOff);exit;
             if ($updateWriteOff != 1) {
                 $db::rollback();
                 $failOrderWhere['order_me'] = $insertOrderData['order_me'];
@@ -373,7 +372,7 @@ class Orderinfo extends Controller
             $param = input('post.');
             $orderModel = new OrderModel();
             if (!isset($param['orderNo']) || !isset($param['acceptCardNo']) || !isset($param['acceptCard'])) {
-                return apiJsonReturn(-1000, "数据无效！");
+                return json(['code' => -1000, 'msg' => '数据无效！', 'data' => []]);
             }
             logs(json_encode(['message' => $param, 'line' => 366]), 'uploadCard_fist');
             $where['order_me'] = $param['orderNo'];
@@ -383,18 +382,16 @@ class Orderinfo extends Controller
                 return apiJsonReturn(-1, "上传无此订单！");
             }
             if (!empty($orderData['cami_account'])) {
-                return apiJsonReturn(-2, "正在核销中！");
-            }
-            if (!empty($orderData['cami_account'])) {
-                return apiJsonReturn(-3, "正在核销中！");
+                return json(['code' => -3, 'msg' => '订单正在正在核销中，请勿重新提交！', 'data' => []]);
             }
 
             try {
                 $updateData['cami_account'] = $param['acceptCardNo'];
                 $updateData['cami_password'] = $param['acceptCard'];
+                $updateData['order_desc'] = "上传卡密成功，正在请求核销";
                 $update = $orderModel->where($where)->update($updateData);
                 if (!$update) {
-                    return apiJsonReturn(-22, "上传失败，请重新下单-22！");
+                    return json(['code' => -22, 'msg' => '提交失败，请截图联系客服！', 'data' => []]);
                 }
 
                 $appKey = "qG4UnbXxzgxdI6VU";
@@ -446,28 +443,29 @@ class Orderinfo extends Controller
                 $updateData2['upload_time'] = date("Y-m-d H:i:s", time());
                 if ($responseData['code'] != 200) {
                     $updateData2['upload_status'] = 2;
+                    $updateData2['order_desc'] = "上传请求失败" . $responseData['msg'];
                 }
                 $update2 = $orderModel->where($where)->update($updateData2);
                 if (!$update2) {
-                    return apiJsonReturn(-5, "提交失败，请重新下单提交！");
+                    return json(['code' => -5, 'msg' => '提交失败，请重新下单提交！', 'data' => []]);
                 }
-                logs(json_encode(['message' => $param, 'uploadData' => $objectMap, 'response' => $responseData]), 'uploadCard_xc_fist');
+                logs(json_encode(['message' => $param, 'uploadData' => $objectMap, 'response' => $responseData]), 'uploadCard_first');
                 //请求核销通道
-
-                return apiJsonReturn(0, "提交成功，请稍后！");
+                return json(['code' => 0, 'msg' => '上传成功，正在处理', 'data' => []]);
             } catch (\Exception $exception) {
                 logs(json_encode(['param' => $param,
                     'file' => $exception->getFile(),
                     'line' => $exception->getLine(),
                     'errorMessage' => $exception->getMessage()]), 'uploadCardException');
 
-                return apiJsonReturn(-11, '', 'uploadCard exception!' . $exception->getMessage());
+                return json(['code' => -11, 'msg' => 'uploadCard exception!' . $exception->getMessage()]);
             } catch (\Error $error) {
                 logs(json_encode(['param' => $param,
                     'file' => $error->getFile(),
                     'line' => $error->getLine(),
                     'errorMessage' => $error->getMessage()]), 'uploadCardError');
-                return apiJsonReturn(-22, '', 'uploadCard error!' . $error->getMessage());
+
+                return json(['code' => -22, 'msg' => 'uploadCard error!' . $error->getMessage()]);
             }
         }
     }

@@ -2,6 +2,7 @@
 
 namespace app\shell;
 
+use app\admin\model\WriteoffModel;
 use app\common\model\OrderModel;
 use think\console\Command;
 use think\console\Input;
@@ -70,6 +71,7 @@ class Checkorder extends Command
                             //修改订单下次查询时间
                             $updateOrderCheckTime = $db::table("bsa_order")->where($updateCheckWhere)
                                 ->update($updateCheckData);
+
                             if ($updateOrderCheckTime) {
                                 $appKey = "qG4UnbXxzgxdI6VU";
                                 $url = "http://114.67.177.36:38088/queryCard?uploadId=" . $v['account'];  //uploadId
@@ -86,9 +88,8 @@ class Checkorder extends Command
                                  * 查询失败
                                  */
                                 //查询失败
-                                $updateCheckData['check_result'] = serialize(var_export($responseData, true));
-                                if ($responseData['code'] != 200 || empty($responseData['data']) || !isset($responseData['data']['state'])) {
-
+                                $updateCheckData['check_result'] = var_export($responseData, true);
+                                if ($responseData['code'] != 200 || !isset($responseData['data']) || empty($responseData['data'])) {
                                     $doChangCheckStatus = true;  //下次继续查询
                                     $updateCheckData['check_status'] = 0;  //查询失败
                                     $updateCheckData['next_check_time'] = time() + 20;  //查询失败
@@ -99,15 +100,19 @@ class Checkorder extends Command
                                  *         2、充值失败   是不可再查询状态
                                  *         3、充值成功   是不可再查询状态
                                  */
+
                                 $cardDta = $responseData['data'][0];
-                                if (isset($cardDta['cardName']) && $cardDta['cardName'] != $val['cami_account']) {
-                                    logs(json_encode(['orderNo' => $v['order_no'],
-                                        'uploadId' => $v['account'],
-                                        'data' => $responseData['data'],
-                                        'time' => date("Y-m-d H:i:s", time()),
-                                        'response' => var_export($responseData, true)
-                                    ]), 'checkorder_cami_different_log');
+                                if (isset($cardDta['cardName']) && $cardDta['cardName'] != $val['cami_account'] || !isset($cardDta['state'])) {
+                                    logs(json_encode(
+                                        [
+                                            'orderNo' => $v['order_no'],
+                                            'uploadId' => $v['account'],
+                                            'response' => $cardDta,
+                                            'time' => date("Y-m-d H:i:s", time()),
+                                        ]
+                                    ), 'checkorder_cami_different_log');
                                 }
+
                                 //待充值, 充值中  是可再查询状态
                                 if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $cardDta['state'] == '充值中')) {
 
@@ -117,16 +122,18 @@ class Checkorder extends Command
                                 }
                                 //充值失败
                                 //查询状态变更为不可查询状态   check_status =2
-                                if (isset($cardDta['state']) && $cardDta['state'] == '充值失败') {
+
+                                if ($cardDta['state'] == '充值失败') {
                                     $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
                                     $updateCheckData['order_status'] = 2;  //支付状态支付失败
                                     $updateCheckData['order_desc'] = "卡密充值失败";  //支付状态支付失败
 
                                     //支付失败 修改核销商金额
                                     $bsaWriteOffData = $db::table("bsa_write_off")
-                                        ->where('write_off_sign', '=', $v['write_off_sign'])
+                                        ->where('write_off_sign', $v['write_off_sign'])
                                         ->lock(true)
                                         ->find();
+
                                     if (!$bsaWriteOffData) {
                                         $doChangCheckStatus = true;  //下次继续查询
                                         $db::rollback();
@@ -139,18 +146,20 @@ class Checkorder extends Command
 
                                     $rateWhere['write_off_sign'] = $v['write_off_sign'];
                                     $rateWhere['cami_type_sign'] = $v['operator'];
-                                    $rete = $db::table("bsa_cami_write")->where($rateWhere)->find()['rate'];
-                                    $freezeAmount = ($v['amount'] * (1 - $rete));
+                                    $rate = $db::table("bsa_cami_write")->where($rateWhere)->find()['rate'];
+
+                                    $freezeAmount = ($v['amount'] * (1 - $rate));
 
                                     //支付成功 核销商上压金额增加
                                     //支付成功 核销商冻结金额金额减少
                                     //增加核销商可用金额
                                     //减少核销商冻结金额
-                                    $updateWriteOff = $db::table("bsa_write_off")
-                                        ->execute("UPDATE bsa_write_off  
-                                         SET use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
-                                             freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
-                                         WHERE  write_off_sign = " . $v['write_off_sign']);
+                                    $writeOffModel = new WriteoffModel();
+                                    $updateWriteOff = $writeOffModel
+                                        ->execute("UPDATE bsa_write_off  SET 
+                                            use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
+                                            freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 
                                     if ($updateWriteOff != 1) {
 
@@ -200,7 +209,7 @@ class Checkorder extends Command
                                         ->execute("UPDATE bsa_write_off  SET  
                                                    freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " , 
                                                    write_off_deposit - " . (number_format($freezeAmount, 3)) . "
-                                                WHERE  write_off_sign = " . $v['write_off_sign']);
+                                                WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 
                                     if ($updateWriteOff != 1) {
 
@@ -219,7 +228,6 @@ class Checkorder extends Command
                                 if (!$updateOrderStatus) {
                                     $doChangCheckStatus = true;  //下次继续查询
                                     logs(json_encode([+
-
                                     'action' => 'updateMatch',
                                         'updateOrderWhere' => $updateCheckWhere,
                                         'updateCheckData' => $updateCheckData,
@@ -259,14 +267,14 @@ class Checkorder extends Command
                             }
                         }
                     }
-                    $output->writeln("Checkorder:处理总数" . $totalNum . "--[" . date("Y-m-d H:i:s", time()) . "] ");
                 }
 
-
             }
+
+            $output->writeln("Checkorder:处理总数" . $totalNum . "--[" . date("Y-m-d H:i:s", time()) . "] ");
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'Checkorder_exception');
-            $output->writeln("Checkorder:exception" . $exception->getMessage() . $exception->getLine());
+            $output->writeln("Checkorder:exception" . $exception->getMessage() . $exception->getLine() . $db::table("bsa_write_off")->getLastSql());
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'Checkorder_error');
             $output->writeln("Checkorder:error");
