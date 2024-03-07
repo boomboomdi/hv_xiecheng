@@ -20,6 +20,20 @@ use phpseclib\Crypt\AES;
 
 class Ceshi extends Controller
 {
+    public function bb()
+    {
+        $appKey = "qG4UnbXxzgxdI6VU";
+
+        $url = "http://114.67.177.36:38088/queryCard?uploadId=" . 74339;  //uploadId
+        $headers = array("appKey: {$appKey}");
+        $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
+
+        $response = httpGET2($url, $headers);
+//        $response = http_get($url, $options);
+//        $response = file_get_contents($url, false, stream_context_create($options));
+        var_dump($response);
+        exit;
+    }
 
 
     //请求网关

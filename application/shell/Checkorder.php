@@ -65,7 +65,10 @@ class Checkorder extends Command
                     $headers = array("appKey: {$appKey}");
                     $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
 
-                    $response = file_get_contents($url, false, stream_context_create($options));
+
+                    $response = httpGET2($url, $headers);
+//                    $response = file_get_contents($url, false, stream_context_create($options));
+
 
                     $responseData = json_decode($response, true);
 
