@@ -447,7 +447,7 @@ function httpGET2($url, $headers)
     $response = curl_exec($curl);
 
     curl_close($curl);
-    echo $response;
+    return $response;
 
 }
 
