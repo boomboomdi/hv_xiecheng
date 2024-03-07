@@ -73,7 +73,7 @@ class Checkorder extends Command
                     $responseData = json_decode($response, true);
 
                     Log::OrderLog('订单查询', $v['order_no'], var_export($responseData, true));
-                    logs(json_encode(['orderNo' => $v['order_no'], 'uploadId' => $v['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $responseData]), 'checkorder_xc_log');
+                    logs(json_encode(['orderNo' => $v['order_no'], 'uploadId' => $v['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $response]), 'checkorder_xc_log');
 //                            {
 //                                "code": 200,
 //                                "data": [
@@ -102,7 +102,7 @@ class Checkorder extends Command
                      *         2、充值失败   是不可再查询状态
                      *         3、充值成功   是不可再查询状态
                      */
-                    if ($responseData['data']['cardName'] != $val['cami_account']) {
+                    if (isset($responseData['data']['cardName']) && $responseData['data']['cardName'] != $val['cami_account']) {
                         logs(json_encode(['orderNo' => $v['order_no'],
                             'uploadId' => $v['account'],
                             'data' => $responseData['data'],
