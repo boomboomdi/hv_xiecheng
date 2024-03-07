@@ -11,6 +11,7 @@
 
 return [
     'app\shell\Timecheckorder',  //查单订单表等待付款订单
+    'app\shell\Checkorder',  //查单订单表等待付款订单
     'app\shell\Timenotifyhx',  //查本地未回调且已支付支付核销单，回调核销
     'app\shell\Timenotifyorder',  //查本地未回调且已支付支付订单单，回调商户
     'app\shell\Timeoutorder',  //超时订单修改订单状态

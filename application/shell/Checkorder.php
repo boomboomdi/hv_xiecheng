@@ -10,7 +10,7 @@ use think\console\Output;
 use think\Db;
 use tool\Log;
 
-class Timecheckorder extends Command
+class Checkorder extends Command
 {
     protected function configure()
     {
