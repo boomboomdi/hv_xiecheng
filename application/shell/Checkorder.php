@@ -63,13 +63,10 @@ class Checkorder extends Command
 
                     $url = "http://114.67.177.36:38088/queryCard?uploadId=" . $v['account'];  //uploadId
                     $headers = array("appKey: {$appKey}");
-                    $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
+//                    $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
 
 
                     $response = httpGET2($url, $headers);
-
-                    logs(json_encode(['orderNo' => $v['order_no'], 'uploadId' => $v['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $response]), 'checkorder_xc1_log');
-
                     $responseData = json_decode($response, true);
 
                     Log::OrderLog('订单查询', $v['order_no'], var_export($responseData, true));
@@ -114,11 +111,14 @@ class Checkorder extends Command
                     //待充值, 充值中  是可再查询状态
                     if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $cardDta['state'] == '充值中')) {
                         $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
+                        $updateCheckData['check_status'] = 0;  //查询状态
                     }
                     //充值失败
                     //查询状态变更为不可查询状态   check_status =2
                     if (isset($cardDta['state']) && $cardDta['state'] == '充值失败') {
                         $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
+                        $updateCheckData['order_status'] = 2;  //支付状态支付失败
+                        $updateCheckData['order_desc'] = "卡密充值失败";  //支付状态支付失败
                     }
 
                     //充值成功
@@ -147,7 +147,8 @@ class Checkorder extends Command
 
                         $freezeAmount = ($v['amount'] * (1 - $v['rate']));
                         $updateWriteOff = $db::table("bsa_write_off")
-                            ->execute("UPDATE bsa_write_off  SET  freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . "  WHERE  write_off_sign = " . $v['write_off_sign']);
+                            ->execute("UPDATE bsa_write_off  SET  freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . "  
+                            WHERE  write_off_sign = " . $v['write_off_sign']);
 
                         if ($updateWriteOff != 1) {
                             logs(json_encode([
@@ -176,10 +177,10 @@ class Checkorder extends Command
                 }
 
             }
-            $output->writeln("Checkorder:订单总数" . $totalNum);
+            $output->writeln("Checkorder:处理总数" . $totalNum . "--[" . date("Y-m-d H:i:s", time()) . "] ");
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'Checkorder_exception');
-            $output->writeln("Checkorder:exception" . $exception->getMessage());
+            $output->writeln("Checkorder:exception" . $exception->getMessage() . $exception->getLine());
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'Checkorder_error');
             $output->writeln("Checkorder:error");
