@@ -105,6 +105,7 @@ class Checkorder extends Command
                     if ($responseData['data']['cardName'] != $val['cami_account']) {
                         logs(json_encode(['orderNo' => $v['order_no'],
                             'uploadId' => $v['account'],
+                            'data' => $responseData['data'],
                             'time' => date("Y-m-d H:i:s", time()),
                             'response' => var_export($responseData, true)
                         ]), 'checkorder_cami_different_log');
