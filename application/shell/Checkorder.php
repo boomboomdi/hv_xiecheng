@@ -177,7 +177,7 @@ class Checkorder extends Command
             $output->writeln("Checkorder:订单总数" . $totalNum);
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'Checkorder_exception');
-            $output->writeln("Checkorder:exception");
+            $output->writeln("Checkorder:exception" . $exception->getMessage());
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'Checkorder_error');
             $output->writeln("Checkorder:error");
