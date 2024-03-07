@@ -33,18 +33,15 @@ class Checkorder extends Command
 
         $db = new Db();
         try {
-            //查询上传成功 upload_status =1
-            //订单状态 order_status = 4
-            //查询次数小于4
-            //当前时间 > next_check_time
             $orderModel = new OrderModel();
             //一直查询  --等待
             $orderData = $orderModel
                 ->where('order_status', '=', 4)    //待支付状态
                 ->where('next_check_time', '<', time())     //当前时间在可以查询期间
-                ->where('check_limit_time', '>', time())    //超时不查
-                ->where('check_times', '<', 5)     //查询次数低于3次
+                ->where('check_limit_time', '>', time())    //没有超时得
+                ->where('check_times', '<', 3)     //查询次数低于3次
                 ->where('check_status', '=', 0)    //查询状态为可查询状态
+                ->where('upload_status', '=', 1)    //查询上传成功
                 ->limit(30)
                 ->select();
 
@@ -165,7 +162,7 @@ class Checkorder extends Command
                     if (!$updateOrderStatus) {
                         logs(json_encode([+
 
-                            'action' => 'updateMatch',
+                        'action' => 'updateMatch',
                             'updateOrderWhere' => $updateCheckWhere,
                             'updateCheckData' => $updateCheckData,
                             'updateSql' => $db::table("bsa_order")->getLastSql(),
