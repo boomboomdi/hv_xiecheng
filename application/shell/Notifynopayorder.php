@@ -102,13 +102,13 @@ class Notifynopayorder extends Command
                     }
                 }
             }
-            $output->writeln("Notifynopayhx:订单总数" . $totalNum);
+            $output->writeln("Notifynopayorder:订单总数" . $totalNum . "，时间：" . date("Y-m-d H:i:s", time()));
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'NotifynopayhxException');
-            $output->writeln("Notifynopayhx:exception");
+            $output->writeln("Notifynopayorder:exception" . $exception->getMessage());
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'NotifynopayhxError');
-            $output->writeln("Notifynopayhx:error");
+            $output->writeln("Notifynopayorder:error" . $error->getMessage());
         }
 
     }
