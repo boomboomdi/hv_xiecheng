@@ -44,6 +44,8 @@ class Notifynopayorder extends Command
                 ->where('upload_status', '=', 2)   //上传失败
                 ->where('order_status', '=', 4)   //下单成功
                 ->select();
+            logs(json_encode(['Notifynopayorder' => $orderData, 'time' => date("Y-m-d H:i:s", time())]), 'Notifynopayorder_first_log');
+
             $db = new Db();
             $totalNum = count($orderData);
             if ($totalNum > 0) {
