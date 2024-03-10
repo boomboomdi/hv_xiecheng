@@ -206,10 +206,10 @@ class Orderinfo extends Controller
             $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
             if (isset($message['cami_type_sign']) && !empty($message['cami_type_sign'])) {
                 if ($message['cami_type_sign'] == 'xiecheng') {
-                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me']."&cami_type_name=xiecheng";
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=xiecheng";
                 }
                 if ($message['cami_type_sign'] == 'Warlmart') {
-                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me']."&cami_type_name=xiecheng";
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=xiecheng";
                 }
             }
             //修改订单状态 //下单成功
@@ -502,7 +502,12 @@ class Orderinfo extends Controller
                 $updateData2['upload_status'] = 1;
                 $updateData2['check_result'] = $responseData['msg'];
                 $updateData2['order_pay'] = $responseData['traceId'];
-                $updateData2['account'] = $responseData['data']['uploadId'];
+
+                $account = "无关键字段返回！";
+                if (isset($responseData['data']['uploadId'])) {
+                    $account = $responseData['data']['uploadId'];
+                }
+                $updateData2['account'] = $account;
                 $updateData2['upload_time'] = date("Y-m-d H:i:s", time());
                 if ($responseData['code'] != 200) {
                     $updateData2['upload_status'] = 2;
