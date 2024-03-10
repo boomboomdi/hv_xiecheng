@@ -41,7 +41,7 @@ class Checkorder extends Command
                 ->where('upload_status', '=', 1)    //查询上传成功
                 ->limit(30)
                 ->select();
-            logs(json_encode(['$orderData' => $orderData, 'time' => date("Y-m-d H:i:s", time())]), 'checkorder_first_log');
+            logs(json_encode(['$orderData' => $orderData,"sql"=>$db::table("bsa_order")->getLastSql(), 'time' => date("Y-m-d H:i:s", time())]), 'checkorder_first_log');
 
             $totalNum = count($orderData);
             if ($totalNum > 0) {
