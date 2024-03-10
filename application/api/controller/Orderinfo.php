@@ -384,11 +384,13 @@ class Orderinfo extends Controller
             ]), 'orderInfoFail');
             return json(msg(-2, '', '访问繁忙，重新下单！'));
         }
+
+        var_dump($orderInfo);exit;
         //可支付状态
-        if ($orderInfo['order_status'] != 4) {
-            echo "请重新下单!!!!" . $orderInfo['order_status'];
-            exit;
-        }
+//        if ($orderInfo['order_status'] != 4) {
+//            echo "请重新下单!!!!" . $orderInfo['order_status'];
+//            exit;
+//        }
 
 
 //        $endTime = $orderInfo['add_time'] + $orderShowTime;
