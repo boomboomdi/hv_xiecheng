@@ -44,9 +44,12 @@ class CamiTypeModel extends Model
     {
         try {
 
-            $has = $this->where('write_off_username', $writeoff['write_off_username'])->findOrEmpty()->toArray();
+            $has = $this
+//                ->where('cami_type_username', $writeoff['cami_type_username'])
+                ->where('cami_type_sign', $writeoff['cami_type_sign'])
+                ->findOrEmpty()->toArray();
             if(!empty($has)) {
-                return modelReMsg(-2, '', '商户名已经存在');
+                return modelReMsg(-2, '', '卡种已存在');
             }
 
             $writeoff['add_time'] = date("Y-m-d H:i:s",time());
@@ -56,7 +59,7 @@ class CamiTypeModel extends Model
             return modelReMsg(-1, '', $e->getMessage());
         }
 
-        return modelReMsg(0, '', '添加核销商成功');
+        return modelReMsg(0, '', '添加卡种成功');
     }
 
     /**
