@@ -203,7 +203,7 @@ class Orderinfo extends Controller
                 }
             }
 
-            $url = $request->domain() . "/api/orderinfo/info" . "?order=" . $insertOrderData['order_me'];
+            $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
             if (isset($message['cami_type_sign']) && !empty($message['cami_type_sign'])) {
                 if ($message['cami_type_sign'] == 'xiecheng') {
                     $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
@@ -354,6 +354,55 @@ class Orderinfo extends Controller
         $this->assign('orderData', $orderInfo);
 //        $this->assign('countdownTime', $countdownTime);
         return $this->fetch('info1');
+    }
+
+
+    /**
+     * 卡密引导页
+     * @return void
+     */
+    public function info2(Request $request)
+    {
+
+//        $imgUrl = $request->domain() . "/upload/weixin517.jpg";
+        $data = @file_get_contents('php://input');
+        $message = json_decode($data, true);
+        $orderShowTime = SystemConfigModel::getOrderShowTime();
+
+//       ['order_status'] = 4;  //下单成功-等待访问
+        $db = new Db();
+        $orderModel = new OrderModel();
+        $orderInfo = $orderModel
+//            ->where("order_no", $message['order'])
+            ->find();
+
+        if (empty($orderInfo)) {
+            logs(json_encode([
+                'action' => 'info',
+                'message' => $message,
+                'lockRes' => $orderInfo,
+            ]), 'orderInfoFail');
+            return json(msg(-2, '', '访问繁忙，重新下单！'));
+        }
+        //可支付状态
+        if ($orderInfo['order_status'] != 4) {
+            echo "请重新下单!!!!" . $orderInfo['order_status'];
+            exit;
+        }
+
+
+//        $endTime = $orderInfo['add_time'] + $orderShowTime;
+//        $now = time();
+//
+//        $countdownTime = $endTime - $now;
+//        if ($countdownTime < 0) {
+//            echo "订单超时，请重新下单！";
+//            exit;
+//        }
+        $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
+        $this->assign('orderData', $orderInfo);
+//        $this->assign('countdownTime', $countdownTime);
+        return $this->fetch('info2');
     }
 
     /**
