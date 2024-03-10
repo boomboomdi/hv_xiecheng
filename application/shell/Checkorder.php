@@ -41,7 +41,7 @@ class Checkorder extends Command
                 ->where('upload_status', '=', 1)    //查询上传成功
                 ->limit(30)
                 ->select();
-            logs(json_encode(['$orderData' => $orderData,"sql"=>$db::table("bsa_order")->getLastSql(), 'time' => date("Y-m-d H:i:s", time())]), 'checkorder_first_log');
+            logs(json_encode(['$orderData' => $orderData, "sql" => $db::table("bsa_order")->getLastSql(), 'time' => date("Y-m-d H:i:s", time())]), 'checkorder_first_log');
 
             $totalNum = count($orderData);
             if ($totalNum > 0) {
@@ -204,11 +204,13 @@ class Checkorder extends Command
 
                                     //支付成功 核销商上压金额增加
                                     //支付成功 核销商冻结金额金额减少
+                                    $updateWriteData['freeze_amount'] = $bsaWriteOffData['freeze_amount'] - number_format((float)$freezeAmount, 3);
+                                    $updateWriteData['write_off_deposit'] = $bsaWriteOffData['write_off_deposit'] - number_format((float)$freezeAmount, 3);
                                     $updateWriteOff = $db::table("bsa_write_off")
-                                        ->execute("UPDATE bsa_write_off  SET  
-                                                   freeze_amount = freeze_amount - " . (number_format((float)$freezeAmount, 3)) . " , 
-                                                   write_off_deposit - " . (number_format((float)$freezeAmount, 3)) . "
-                                                WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+                                        ->where('write_off_sign', '=', $v['write_off_sign'])
+                                        ->update($updateWriteData);
+//                                    execute("UPDATE bsa_write_off  SET
+//                                                   freeze_amount = freeze_amount - " . (number_format((float)$freezeAmount, 3)) . " , write_off_deposit - " . (number_format((float)$freezeAmount, 3)) . " WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 
                                     if ($updateWriteOff != 1) {
 
