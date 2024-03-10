@@ -55,7 +55,7 @@ class Cami extends Base
             $param = input('post.');
             $validate = new CamitypeValidate();
             if (!$validate->check($param)) {
-                return ['code' => -1, 'data' => '', 'msg' => $validate->getError()];
+                return ['code' => -1, 'data' => '', 'msg' => $validate->getError()."addcamitype"];
             }
 
 
