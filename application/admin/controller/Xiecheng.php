@@ -19,7 +19,7 @@ use think\App;
 use think\Db;
 use tool\Log;
 
-class Walmart extends Base
+class Xiecheng extends Base
 {
 
     protected $camiTypeId = 6; //卡种ID;
