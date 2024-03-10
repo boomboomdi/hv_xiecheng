@@ -367,6 +367,8 @@ class Orderinfo extends Controller
 //        $imgUrl = $request->domain() . "/upload/weixin517.jpg";
         $data = @file_get_contents('php://input');
         $message = json_decode($data, true);
+
+        $message = $request->param();
         $orderShowTime = SystemConfigModel::getOrderShowTime();
 
 //       ['order_status'] = 4;  //下单成功-等待访问
