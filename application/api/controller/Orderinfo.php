@@ -206,10 +206,10 @@ class Orderinfo extends Controller
             $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
             if (isset($message['cami_type_sign']) && !empty($message['cami_type_sign'])) {
                 if ($message['cami_type_sign'] == 'xiecheng') {
-                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me']."&cami_type_name=xiecheng";
                 }
                 if ($message['cami_type_sign'] == 'Warlmart') {
-                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me']."&cami_type_name=xiecheng";
                 }
             }
             //修改订单状态 //下单成功
