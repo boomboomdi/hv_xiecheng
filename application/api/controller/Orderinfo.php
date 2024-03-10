@@ -449,6 +449,13 @@ class Orderinfo extends Controller
             }
 
             try {
+                $hasWhere['cardName'] = $param['cami_account'];
+                $hasWhere['cami_password'] = $param['acceptCard'];
+                $hasWhere['order_status'] = 1;
+                $isHasOrderData = $orderModel->where($where)->find();
+                if ($isHasOrderData) {
+                    return json(['code' => -12, 'msg' => '卡密已上传，请勿重新提交提交！', 'data' => []]);
+                }
                 $updateData['cami_account'] = $param['acceptCardNo'];
                 $updateData['cami_password'] = $param['acceptCard'];
                 $updateData['order_desc'] = "上传卡密成功，正在请求核销";
