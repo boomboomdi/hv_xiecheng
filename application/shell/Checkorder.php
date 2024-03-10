@@ -155,7 +155,7 @@ class Checkorder extends Command
                                     //增加核销商可用金额
                                     //减少核销商冻结金额
                                     $writeOffModel = new WriteoffModel();
-                                    $updateWriteOff = $writeOffModel
+                                    $updateWriteOff = $db::table("bsa_write_off")
                                         ->execute("UPDATE bsa_write_off  SET 
                                             use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
                                             freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
