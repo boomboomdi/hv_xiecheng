@@ -378,13 +378,15 @@ class Orderinfo extends Controller
 
         if (empty($orderInfo)) {
             logs(json_encode([
-                'action' => 'info',
+                'action' => 'info2',
                 'message' => $message,
                 'lockRes' => $orderInfo,
             ]), 'orderInfoFail');
             return json(msg(-2, '', '访问繁忙，重新下单！'));
         }
 
+        var_dump($message);
+        echo "</br>";
         var_dump($orderInfo);exit;
         //可支付状态
 //        if ($orderInfo['order_status'] != 4) {
