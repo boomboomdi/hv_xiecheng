@@ -525,10 +525,12 @@ class Orderinfo extends Controller
             }
 
             try {
+                //卡密
                 $hasWhere['cami_account'] = $param['acceptCardNo'];
                 $hasWhere['cami_password'] = $param['acceptCard'];
                 $hasWhere['order_status'] = 1;
-                $isHasOrderData = $orderModel->where($where)->find();
+                $isHasOrderData = $orderModel->where($hasWhere)->find();
+
                 if ($isHasOrderData) {
                     return json(['code' => -12, 'msg' => '卡密已上传，请勿重新提交提交！', 'data' => []]);
                 }
