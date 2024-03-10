@@ -181,6 +181,7 @@ class Checkorder extends Command
                                     $updateCheckData['order_desc'] = "支付成功-等候回调";  //支付成功状态
                                     $updateCheckData['order_status'] = 1;  //支付成功状态
                                     $updateCheckData['pay_status'] = 1;  //支付成功状态
+                                    $updateCheckData['pay_time'] = time();  //支付成功状态
                                     $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
                                     if ($cardDta['amount'] != $v['amount']) {
                                         $updateCheckData['order_desc'] = "支付成功-差额订单";  //支付成功状态
