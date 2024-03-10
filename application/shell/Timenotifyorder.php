@@ -71,13 +71,13 @@ class Timenotifyorder extends Command
                     }
                 }
             }
-            $output->writeln("Timenotifyhxiao:订单总数" . $totalNum);
+            $output->writeln("Timenotifyorder:订单总数" . $totalNum);
         } catch (\Exception $exception) {
-            logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'Timenotifyhxiao_exception');
-            $output->writeln("Timenotifyhxiao:exception");
+            logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'Timenotifyorder_exception');
+            $output->writeln("Timenotifyorder:exception");
         } catch (\Error $error) {
-            logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'TiTimenotifyhxiao_error');
-            $output->writeln("Timenotifyhxiao:error");
+            logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'Timenotifyorder_error');
+            $output->writeln("Timenotifyorder:error");
         }
 
     }
