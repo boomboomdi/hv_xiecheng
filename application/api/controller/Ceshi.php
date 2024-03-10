@@ -21,14 +21,28 @@ use phpseclib\Crypt\AES;
 class Ceshi extends Controller
 {
 
+    public function ddd()
+    {
+        $db = new Db();
+        $orderWhere['order_no'] = "BJ202403101441460010796";
+        $order = $db::table("bsa_order")->where($orderWhere)->find();
+//        var_dump($order['rate']);exit;
+        $rete = $db::table("bsa_cami_write")->where($rateWhere)->find()['rate'];
+        $freezeAmount = ($v['amount'] * (1 - $rete));
+        $db->
+        execute("UPDATE bsa_write_off  SET
+                                                 freeze_amount = freeze_amount - " . (number_format((float)$freezeAmount, 3)) . " , write_off_deposit - " . (number_format((float)$freezeAmount, 3)) . " WHERE  write_off_id = " . 7);
+
+    }
+
     public function cc()
     {
         $aaa = array();
         for ($i = 0; $i < 3; ++$i) {
             $aaa[] = $i;
         }
-        foreach ($aaa as $k => $v){
-            if($v){
+        foreach ($aaa as $k => $v) {
+            if ($v) {
 
             }
 
