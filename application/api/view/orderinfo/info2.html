@@ -199,11 +199,12 @@
                                 <!-- 本人账户支付 文案 -->
                                 <div id="tips" class="" style="opacity: 1;">
                                     <ul>
-                                        <li>操作步骤：</li>
-                                        <li>请在携程app购买卡密</li>
-                                        <li>请在 我的-我的携程-礼品卡热销榜找到任意对应金额电子卡并购买</li>
-                                        <li>付款时候账号随便填写，付款成功后点击订单详情</li>
-                                        <li>点击联系客服获取卡号和密码，正确输入卡号和密码，一定点击确认提交！</li>
+                                        <li><span style='color:red;font-size:22px;'>操作步骤：</span></li>
+                                        <li>登入携程app—我的—钱包—礼品卡</li>
+                                        <li>购买任意主题<span style='color:red;font-size:22px;'>任我行</span>电子卡</li>
+                                        <li>金额选择-自定义 输入下单金额</li>
+                                        <li>付款完成点击-查看领用-获取卡密</li>
+                                        <li>返回本页面正确输入卡号和密码，一定点击确认提交！</li>
                                         <li>
                                             <div style="font-size:14px;color: #f00;font-weight:bold">
                                                 注意：若不按照操作步骤导致账单无法核实需要您个人承担损失
@@ -333,13 +334,11 @@
                                 function tishi() {
                                     if (true) {
                                         var tip = "<span style='font-size:18px;color:red'>使用帮助</span><br><br>" +
-                                            "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px; background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);'>" + cardName + "</span></span><span style='color:red;font-size:22px;'>" + "任我行" + "</span><br><br>" +
-                                            "<span style='font-size:18px;'>1.请购买正确卡密，否则无法使用</span><br><br>" +
-                                            "<span style='font-size:18px;'>2.注意：</span><span style='color:red;font-size:22px;'>" + prompt + "</span><br><br>" +
-                                            "<span style='font-size:16px;'>3.购买后 <span style='background-image: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);'>[无需确认收货]</span>（商家要求提前确认的为无法使用的卡密）</span><br><br>" +
-                                            "<span style='font-size:18px;'>4.购买成功后，提交正确卡号卡密即可充值</span><br><br>" +
-                                            "<span style='font-size:18px;'></span><span style='color:red;font-size:22px;'>让您在非淘宝/京东/抖音等电商平台交易的都是骗子</span><br><br>" +
-                                            "<span style='font-size:18px;'>店铺 【新百顺通专店】请勿购买，是骗子</span><br><br>"
+                                            "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px;'>携程</span></span><span style='color:red;font-size:22px;'>任我行</span>电子卡<br><br>" +
+                                            "<span style='font-size:18px;'>无溢价，支持所有付款方式</span><br><br>" +
+                                            "<span style='font-size:18px;'>1.点击跳转链接  下载登入”携程app“</span><br><br>" +
+                                            "<span style='font-size:18px;'>2.按照步骤操作  秒上分</span><br><br>" +
+                                            "<span style='font-size:18px;'>注意：一定要买【任我行】【电子卡】</span><br><br>"
 
                                         layer.open({
                                             title: '温馨提示'
@@ -353,22 +352,27 @@
                                 function getOrderById() {
                                     orderNos = GetQueryString("id");
                                     var url = "/api/orderinfo/getinfo?id=" + orderNos;
-
-                                    // alert(url);
-                                    // var url = "/getOrderInfo/api/getById?id=" + orderNos;
-                                    // let obj1 = {
-                                    //     orderNo: orderNos
-                                    // };
                                     $.ajax({
                                         url: url,
                                         type: 'get',
                                         async: false,
                                         success: function (data) {
-                                        },
+                                            // clearInterval(timer);
+                                            layer.closeAll();
+                                            // var msg = data.msg;
+
+                                            // console.log(data);
+                                            // // console.log(orderNo);
+                                            // if (0 == data.code) {
+                                            //     // alert(msg);
+                                            //     isTip = true;
+                                            //     location.reload();
+                                            // } else {
+                                            //     alert(data.msg);
+                                            // }
+                                        }
+                                        ,
                                         error: function () {
-                                            isTip = false
-                                            alert(error);
-                                            // window.open('https://www.baidu.com/', '_self');
                                             layer.closeAll();
                                         }
                                     });
@@ -585,6 +589,5 @@
                             </script>
 
 
-                            </i>
 </body>
 </html>

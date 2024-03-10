@@ -317,98 +317,121 @@ class Orderinfo extends Controller
      */
     public function info(Request $request)
     {
-
-//        $imgUrl = $request->domain() . "/upload/weixin517.jpg";
-        $data = @file_get_contents('php://input');
-        $message = json_decode($data, true);
-        $orderShowTime = SystemConfigModel::getOrderShowTime();
-
-//       ['order_status'] = 4;  //下单成功-等待访问
+        $message = $request->param();
         $db = new Db();
-        $orderModel = new OrderModel();
-        $orderInfo = $orderModel
-            ->where("order_me", $message['order'])
-            ->find();
+        try {
+            if (!isset($message['order']) || empty($message['order'])) {
+                echo "请重新下单";
+                exit;
+            }
+            $orderWhere['order_status'] = 4;  //下单成功-等待访问
+            $orderWhere['order_me'] = $message['order'];  //下单成功-等待访问
 
-        if (empty($orderInfo)) {
-            logs(json_encode([
-                'action' => 'info',
-                'message' => $message,
-                'lockRes' => $orderInfo,
-            ]), 'orderInfoFail');
-            return json(msg(-2, '', '访问繁忙，重新下单！'));
+            $db = new Db();
+            $orderModel = new OrderModel();
+            $orderInfo = $orderModel
+                ->where($orderWhere)
+                ->find();
+            if (empty($orderInfo)) {
+                logs(json_encode([
+                    'action' => 'info',
+                    'message' => $message,
+                    'lockRes' => $orderInfo,
+                ]), 'orderInfoFail');
+                echo '访问繁忙，重新下单！';
+            }
+            //可支付状态
+            if ($orderInfo['order_status'] != 4) {
+                echo "请重新下单!!!!" . $orderInfo['order_status'];
+                exit;
+            }
+            $orderShowTime = SystemConfigModel::getOrderShowTime();
+            $endTime = $orderInfo['add_time'] + $orderShowTime;
+            $now = time();
+            $countdownTime = $endTime - $now;
+            if ($countdownTime < 0) {
+                echo "订单超时，请重新下单！";
+                exit;
+            }
+            $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
+            $this->assign('orderData', $orderInfo);
+            return $this->fetch('info1');
+        } catch (\Error $error) {
+            logs(json_encode(['file' => $error->getFile(),
+                'line' => $error->getLine(), 'errorMessage' => $error->getMessage()
+            ]), 'infoError');
+            return json(msg(-22, '', "Error-22"));
+        } catch (\Exception $exception) {
+            logs(json_encode(['file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'errorMessage' => $exception->getMessage(),
+                'lastSql' => $db::table('bsa_order')->getLastSql(),
+            ]), 'infoErrorException');
         }
-        //可支付状态
-        if ($orderInfo['order_status'] != 4) {
-            echo "请重新下单!!!!" . $orderInfo['order_status'];
-            exit;
-        }
 
-
-//        $endTime = $orderInfo['add_time'] + $orderShowTime;
-//        $now = time();
-//
-//        $countdownTime = $endTime - $now;
-//        if ($countdownTime < 0) {
-//            echo "订单超时，请重新下单！";
-//            exit;
-//        }
-        $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
-        $this->assign('orderData', $orderInfo);
-//        $this->assign('countdownTime', $countdownTime);
-        return $this->fetch('info1');
     }
 
 
     /**
-     * 卡密引导页
+     * 携程订单页
      * @return void
      */
     public function info2(Request $request)
     {
 
-//        $imgUrl = $request->domain() . "/upload/weixin517.jpg";
-        $data = @file_get_contents('php://input');
-        $message = json_decode($data, true);
-
-        $message = $request->param();
-        $orderShowTime = SystemConfigModel::getOrderShowTime();
-
-//       ['order_status'] = 4;  //下单成功-等待访问
         $db = new Db();
-        $orderModel = new OrderModel();
-        $orderInfo = $orderModel
-            ->where("order_me", $message['order'])
-            ->find();
+        try {
 
-        if (empty($orderInfo)) {
-            logs(json_encode([
-                'action' => 'info2',
-                'message' => $message,
-                'lockRes' => $orderInfo,
-            ]), 'orderInfoFail');
-            return json(msg(-2, '', '访问繁忙，重新下单！'));
+            $message = $request->param();
+            if (!isset($message['order']) || empty($message['order'])) {
+                echo "请重新下单";
+                exit;
+            }
+            $orderWhere['order_status'] = 4;  //下单成功-等待访问
+            $orderWhere['order_me'] = $message['order'];  //下单成功-等待访问
+
+            $orderModel = new OrderModel();
+            $orderInfo = $orderModel
+                ->where($orderWhere)
+                ->find();
+            if (empty($orderInfo)) {
+                logs(json_encode([
+                    'action' => 'info',
+                    'message' => $message,
+                    'lockRes' => $orderInfo,
+                ]), 'orderInfoFail');
+                echo '访问繁忙，重新下单！';
+            }
+            //可支付状态
+            if ($orderInfo['order_status'] != 4) {
+                echo "请重新下单!!!!" . $orderInfo['order_status'];
+                exit;
+            }
+            $orderShowTime = SystemConfigModel::getOrderShowTime();
+            $endTime = $orderInfo['add_time'] + $orderShowTime;
+            $now = time();
+            $countdownTime = $endTime - $now;
+            if ($countdownTime < 0) {
+                echo "订单超时，请重新下单！";
+                exit;
+            }
+            $orderInfo['camiTypeName'] = "携程电子卡";
+            $this->assign('orderData', $orderInfo);
+            return $this->fetch('info2');
+        } catch (\Error $error) {
+            logs(json_encode(['file' => $error->getFile(),
+                'line' => $error->getLine(), 'errorMessage' => $error->getMessage()
+            ]), 'infoError');
+
+            echo "订单页繁忙！Error-22";
+        } catch (\Exception $exception) {
+            logs(json_encode(['file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'errorMessage' => $exception->getMessage(),
+                'lastSql' => $db::table('bsa_order')->getLastSql(),
+            ]), 'infoErrorException');
+            echo "订单页繁忙! exception-11";
         }
-        //可支付状态
-//        if ($orderInfo['order_status'] != 4) {
-//            echo "请重新下单!!!!" . $orderInfo['order_status'];
-//            exit;
-//        }
-
-
-//        $endTime = $orderInfo['add_time'] + $orderShowTime;
-//        $now = time();
-//
-//        $countdownTime = $endTime - $now;
-//        if ($countdownTime < 0) {
-//            echo "订单超时，请重新下单！";
-//            exit;
-//        }
-        $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
-        $orderInfo['camiTypeName'] = "携程电子卡";
-        $this->assign('orderData', $orderInfo);
-//        $this->assign('countdownTime', $countdownTime);
-        return $this->fetch('info2');
     }
 
     /**
@@ -420,8 +443,58 @@ class Orderinfo extends Controller
      */
     public function getInfo(Request $request)
     {
+        $db = new Db();
+        try {
 
-        return apiJsonReturn(0, "上传测试！");
+            $message = $request->param();
+            if (!isset($message['id']) || empty($message['id'])) {
+                return json(['code' => -1, 'msg' => '数据无效！', 'data' => []]);
+            }
+            $orderWhere['order_status'] = 4;  //下单成功-等待访问
+            $orderWhere['order_me'] = $message['order'];  //下单成功-等待访问
+
+            $orderModel = new OrderModel();
+            $orderInfo = $orderModel
+                ->where($orderWhere)
+                ->find();
+            if (empty($orderInfo)) {
+                logs(json_encode([
+                    'action' => 'info',
+                    'message' => $message,
+                    'ip' => $request->ip(),
+                    'lockRes' => $orderInfo,
+                ]), 'orderInfoFail');
+                return json(['code' => -1000, 'msg' => '请重新下单！', 'data' => []]);
+            }
+            //可支付状态
+            if ($orderInfo['order_status'] != 4) {
+                return json(['code' => -2, 'msg' => '请重新下单！', 'data' => []]);
+            }
+            $orderShowTime = SystemConfigModel::getOrderShowTime();
+            $endTime = $orderInfo['add_time'] + $orderShowTime;
+            $now = time();
+            $countdownTime = $endTime - $now;
+            if ($countdownTime < 0) {
+                return json(['code' => -3, 'msg' => '订单冻结！', 'data' => []]);
+            }
+
+            return json(['code' => 0, 'msg' => '可支付！', 'data' => []]);
+        } catch (\Error $error) {
+            logs(json_encode(['file' => $error->getFile(),
+                'line' => $error->getLine(), 'errorMessage' => $error->getMessage()
+            ]), 'getInfoError');
+
+            return json(['code' => -11, 'msg' => '订单异常不可支付！', 'data' => []]);
+        } catch (\Exception $exception) {
+            logs(json_encode(['file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'errorMessage' => $exception->getMessage(),
+                'lastSql' => $db::table('bsa_order')->getLastSql(),
+            ]), 'getInfoErrorException');
+            return json(['code' => -3, 'msg' => '订单冻结！', 'data' => []]);
+        }
+
+        return json(['code' => -333, 'msg' => '失败！', 'data' => []]);
     }
 
     /**
