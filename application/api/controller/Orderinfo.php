@@ -57,10 +57,10 @@ class Orderinfo extends Controller
             $sig = md5($message['merchant_sign'] . $message['order_no'] . $message['amount'] . $message['time'] . $token);
 //
 //
-            if ($sig != $message['sign']) {
-                logs(json_encode(['orderParam' => $message, 'doMd5' => $sig]), 'orderParamSignFail');
-                return apiJsonReturn(-3, "验签失败！");
-            }
+//            if ($sig != $message['sign']) {
+//                logs(json_encode(['orderParam' => $message, 'doMd5' => $sig]), 'orderParamSignFail');
+//                return apiJsonReturn(-3, "验签失败！");
+//            }
             $orderFind = $db::table('bsa_order')->where('order_no', '=', $message['order_no'])->count();
             if ($orderFind > 0) {
                 return apiJsonReturn(-4, "order_no existed 订单号单号重复！");
