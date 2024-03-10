@@ -324,7 +324,7 @@ class Orderinfo extends Controller
         $db = new Db();
         $orderModel = new OrderModel();
         $orderInfo = $orderModel
-//            ->where("order_no", $message['order'])
+            ->where("order_me", $message['order'])
             ->find();
 
         if (empty($orderInfo)) {
@@ -375,7 +375,7 @@ class Orderinfo extends Controller
         $db = new Db();
         $orderModel = new OrderModel();
         $orderInfo = $orderModel
-//            ->where("order_no", $message['order'])
+            ->where("order_me", $message['order'])
             ->find();
 
         if (empty($orderInfo)) {
@@ -386,10 +386,6 @@ class Orderinfo extends Controller
             ]), 'orderInfoFail');
             return json(msg(-2, '', '访问繁忙，重新下单！'));
         }
-
-        var_dump($message);
-        echo "</br>";
-        var_dump($orderInfo);exit;
         //可支付状态
 //        if ($orderInfo['order_status'] != 4) {
 //            echo "请重新下单!!!!" . $orderInfo['order_status'];
