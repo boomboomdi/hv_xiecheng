@@ -35,7 +35,7 @@ class Checkorder extends Command
             $orderData = $orderModel
                 ->where('order_status', '=', 4)    //待支付状态
                 ->where('next_check_time', '<', time())     //当前时间在可以查询期间
-                ->where('order_limit_time', '>', time())    //没有超时得
+//                ->where('order_limit_time', '>', time())    //没有超时得
                 ->where('check_times', '<', 3)     //查询次数低于3次
                 ->where('check_status', '=', 0)    //查询状态为可查询状态
                 ->where('upload_status', '=', 1)    //查询上传成功
@@ -188,7 +188,6 @@ class Checkorder extends Command
                                         ->lock(true)
                                         ->find();
                                     if (!$bsaWriteOffData) {
-
                                         $doChangCheckStatus = true;  //下次继续查询
                                         $db::rollback();
                                         logs(json_encode([
