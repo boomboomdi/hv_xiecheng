@@ -181,6 +181,12 @@ class Checkorder extends Command
                                     $updateCheckData['order_desc'] = "支付成功-等候回调";  //支付成功状态
                                     $updateCheckData['order_status'] = 1;  //支付成功状态
                                     $updateCheckData['pay_status'] = 1;  //支付成功状态
+                                    $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
+                                    if ($cardDta['amount'] != $v['amount']) {
+                                        $updateCheckData['order_desc'] = "支付成功-差额订单";  //支付成功状态
+                                        $updateCheckData['do_notify'] = 2;  //拒绝回调
+                                        $updateCheckData['notify_status'] = 2;  //拒绝回调
+                                    }
                                     //更新订单
                                     //修改核销商金额
                                     $bsaWriteOffData = $db::table("bsa_write_off")

@@ -36,34 +36,15 @@ class Writeoff extends Base
             $list = $writeOffModel->getWriteoffs($limit, $where);
             $data = empty($list['data']) ? array() : $list['data'];
             foreach ($data as $key => $vo) {//推单数量（每个金额）
-                $data[$key]['orderTotalNum'] = Db::table("bsa_order_hexiao")
-                    ->where("write_off_sign", '=', $vo['write_off_sign'])
-                    ->count();
+
                 //推单总额
-                $data[$key]['totalOrderAmount'] = Db::table("bsa_order_hexiao")
-                    ->field("SUM(order_amount) as totalOrderAmount")
+                $data[$key]['totalOrderAmount'] = Db::table("bsa_order")
+                    ->field("SUM(actual_amount) as totalOrderAmount")
                     ->where("write_off_sign", '=', $vo['write_off_sign'])
                     ->find()['totalOrderAmount'];
 
-                //总支付数量（每个金额）
-                $data[$key]['totalPayOrderAmountNum'] = Db::table("bsa_order_hexiao")
-                    ->where("write_off_sign", '=', $vo['write_off_sign'])
-                    ->where("pay_status", '=', 1)
-                    ->count();
-                //总支付金额（每个金额）
-                $data[$key]['totalPayOrderAmount'] = Db::table("bsa_order_hexiao")
-                    ->field("SUM(pay_amount) as totalPayOrderAmount")
-                    ->where("write_off_sign", '=', $vo['write_off_sign'])
-                    ->find()['totalPayOrderAmount'];
 
-                //剩余单量
-                $data[$key]['noUseOrderAmountNum'] = Db::table("bsa_order_hexiao")
-                    ->where("write_off_sign", '=', $vo['write_off_sign'])
-                    ->where("pay_status", '=', 0)
-                    ->where("order_status", '=', 0)
-                    ->where("status", '=', 0)
-//                    ->where('limit_time', '>', time() + $orderLimitTime)
-                    ->count();
+
                 //剩余可用单量
                 $data[$key]['canOrderAmountNum'] = Db::table("bsa_order_hexiao")
                     ->where("write_off_sign", '=', $vo['write_off_sign'])

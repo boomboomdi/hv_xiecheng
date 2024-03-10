@@ -21,6 +21,16 @@ use phpseclib\Crypt\AES;
 class Ceshi extends Controller
 {
 
+    public function aea()
+    {
+        $data = Db::table("bsa_order")
+            ->field("SUM(actual_amount) as totalOrderAmount")
+            ->where("write_off_sign", '=', '王大拿')
+            ->find()['totalOrderAmount'];
+        var_dump($data);exit;
+        var_dump(Db::table("bsa_order")->getLastSql());
+    }
+
     //下单
     public function ddd1()
     {
@@ -38,9 +48,11 @@ class Ceshi extends Controller
                                             freeze_amount = freeze_amount + " . (number_format($freezeAmount, 3)) . " 
                                             WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 
-        var_dump($db::table("bsa_write_off")->getLastSql());exit;
+        var_dump($db::table("bsa_write_off")->getLastSql());
+        exit;
 
     }
+
     //支付失败
     public function eee()
     {
@@ -56,7 +68,8 @@ class Ceshi extends Controller
                                             use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
                                             freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
                                             WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
-        var_dump($db::table("bsa_write_off")->getLastSql());exit;
+        var_dump($db::table("bsa_write_off")->getLastSql());
+        exit;
 
     }
 
@@ -75,7 +88,8 @@ class Ceshi extends Controller
                                             freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " ,
                                             write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
                                             WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
-        var_dump($db::table("bsa_write_off")->getLastSql());exit;
+        var_dump($db::table("bsa_write_off")->getLastSql());
+        exit;
 
     }
 
