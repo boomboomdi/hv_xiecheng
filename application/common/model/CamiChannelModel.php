@@ -25,6 +25,7 @@ class CamiChannelModel extends Model
      */
     public function getUseCamiChannel($searchData)
     {
+        $db = new Db();
         try {
             $searchCamiData['cami_type_sign'] = $searchData['cami_type_sign'];
             $searchCamiData['status'] = 1;
@@ -44,10 +45,17 @@ class CamiChannelModel extends Model
 
 
         } catch (\Exception $e) {
+            logs(json_encode([
+                'action' => 'getUseCamiChannel',
+                'searchData' => $searchData,
+                'lastSql' => $db::table('bsa_cami_write')->getLastSql(),
+                'Exception' => $e->getMessage(),
+            ]), 'getUseCamiChannelException');
             return modelReMsg(-1, '', $e->getMessage());
         }
         return modelReMsg(0, $camiType, 'ok');
     }
+
     /**
      * 获取推单信息
      * @param $MerchantOrderNo
