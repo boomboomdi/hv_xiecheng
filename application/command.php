@@ -11,6 +11,7 @@
 
 return [
     'app\shell\Checkceshir',  //测试
+    'app\shell\Timenotifyorder',  //测试
     'app\shell\Timecheckorder',  //查单订单表等待付款订单
     'app\shell\Checkorder',  //查单订单表等待付款订单
     'app\shell\Notifynopayorder',  //查单订单表等待付款订单
