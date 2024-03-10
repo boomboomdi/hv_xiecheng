@@ -133,7 +133,8 @@
                                         <div class="bill-price-row1">
                                             <span class="bill-price-main">
                                             <span class="corange">
-                                                 <span class="cfont18 bold" id="card_name">携程礼品卡{$orderData['amount']}元</span>
+                                                 <span class="cfont18 bold"
+                                                       id="card_name">携程礼品卡{$orderData['amount']}元</span>
                                             </span>
                                             </span>
                                         </div>
@@ -181,9 +182,8 @@
                                 </div>
 
 
-
                                 <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">
-                                    <a class="p-n-index-btn" id=""  href = "https://app.ctrip.com/?app=1&from=c67"
+                                    <a class="p-n-index-btn" id="" href="https://app.ctrip.com/?app=1&from=c67"
                                        style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
                                        href="">点击跳转下载携程</a>
                                 </div>
@@ -285,7 +285,7 @@
                             </script>
                             <script>
 
-                                var cardName = '{$orderData["camiTypeName"]}';
+                                var cardName = '携程电子卡（任我行）';
                                 var cardNoLenth;
                                 var pwdNoLenth;
                                 var prompt = '{$orderData["camiTypeName"]}';
@@ -330,7 +330,7 @@
 
 
                                 function tishi() {
-                                    if (isTip) {
+                                    if (true) {
                                         var tip = "<span style='font-size:18px;color:red'>使用帮助</span><br><br>" +
                                             "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px; background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);'>" + cardName + "</span><br><br>" +
                                             "<span style='font-size:18px;'>1.请购买正确卡密，否则无法使用</span><br><br>" +
@@ -358,23 +358,6 @@
                                     // let obj1 = {
                                     //     orderNo: orderNos
                                     // };
-                                    $.ajax({
-                                        type: 'GET',
-                                        url: url + orderNo,
-                                        dataType: 'json',
-                                        xhrFields: {
-                                            withCredentials: true
-                                        },
-                                        success: function (result) {
-
-                                            // alert(result);
-                                            // if (result.header.code == 0) {
-                                            //
-                                            // } else if (result.header.code == 99999) {
-                                            //     // back();
-                                            // }
-                                        }
-                                    });
                                     $.ajax({
                                         url: url,
                                         type: 'get',
