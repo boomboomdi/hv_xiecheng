@@ -207,8 +207,8 @@ class Checkorder extends Command
                                     //支付成功 核销商冻结金额金额减少
                                     $updateWriteOff = $db::table("bsa_write_off")
                                         ->execute("UPDATE bsa_write_off  SET  
-                                                   freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " , 
-                                                   write_off_deposit - " . (number_format($freezeAmount, 3)) . "
+                                                   freeze_amount = freeze_amount - " . (number_format((float)$freezeAmount, 3)) . " , 
+                                                   write_off_deposit - " . (number_format((float)$freezeAmount, 3)) . "
                                                 WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 
                                     if ($updateWriteOff != 1) {
@@ -273,7 +273,7 @@ class Checkorder extends Command
 
             $output->writeln("Checkorder:处理总数" . $totalNum . "--[" . date("Y-m-d H:i:s", time()) . "] ");
         } catch (\Exception $exception) {
-            logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'Checkorder_exception');
+            logs(json_encode(['file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage() . $db::table("bsa_write_off")->getLastSql()]), 'Checkorder_exception');
             $output->writeln("Checkorder:exception" . $exception->getMessage() . $exception->getLine() . $db::table("bsa_write_off")->getLastSql());
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'Checkorder_error');
