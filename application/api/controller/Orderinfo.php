@@ -525,7 +525,7 @@ class Orderinfo extends Controller
             }
 
             try {
-                $hasWhere['cardName'] = $param['cami_account'];
+                $hasWhere['cami_account'] = $param['acceptCardNo'];
                 $hasWhere['cami_password'] = $param['acceptCard'];
                 $hasWhere['order_status'] = 1;
                 $isHasOrderData = $orderModel->where($where)->find();

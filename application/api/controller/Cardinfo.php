@@ -40,8 +40,9 @@ class Cardinfo extends Controller
 
         $data = @file_get_contents('php://input');
         $db = new Db();
+        $message = $request->param();
         try {
-            logs(json_encode(['message' => $data]), 'cardUploadNotify_fist');
+            logs(json_encode(['message' => $data]), 'cardUploadNotify_first');
 
             $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
             $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
