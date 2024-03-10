@@ -400,6 +400,7 @@ class Orderinfo extends Controller
 //            exit;
 //        }
         $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
+        $orderInfo['camiTypeName'] = "携程电子卡";
         $this->assign('orderData', $orderInfo);
 //        $this->assign('countdownTime', $countdownTime);
         return $this->fetch('info2');
