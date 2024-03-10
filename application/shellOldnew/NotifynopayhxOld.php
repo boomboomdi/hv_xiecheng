@@ -1,17 +1,14 @@
 <?php
 
-namespace app\shell;
+namespace app\shellOldnew;
 
 use app\common\model\OrderhexiaoModel;
-use app\common\model\OrderModel;
+use app\common\Redis;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
-
-use app\common\Redis;
-use app\common\model\SystemConfigModel;
-use app\common\model\NotifylogModel;
 use think\Db;
+use function logs;
 
 class NotifynopayhxOld extends Command
 {

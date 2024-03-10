@@ -54,13 +54,13 @@ class Orderinfo extends Controller
             if (empty($token)) {
                 return apiJsonReturn(-2, "商户验证失败！");
             }
-//            $sig = md5($message['merchant_sign'] . $message['order_no'] . $message['amount'] . $message['time'] . $token);
+            $sig = md5($message['merchant_sign'] . $message['order_no'] . $message['amount'] . $message['time'] . $token);
 //
 //
-//            if ($sig != $message['sign']) {
-//                logs(json_encode(['orderParam' => $message, 'doMd5' => $sig]), 'orderParamSignFail');
-//                return apiJsonReturn(-3, "验签失败！");
-//            }
+            if ($sig != $message['sign']) {
+                logs(json_encode(['orderParam' => $message, 'doMd5' => $sig]), 'orderParamSignFail');
+                return apiJsonReturn(-3, "验签失败！");
+            }
             $orderFind = $db::table('bsa_order')->where('order_no', '=', $message['order_no'])->count();
             if ($orderFind > 0) {
                 return apiJsonReturn(-4, "order_no existed 订单号单号重复！");
@@ -200,7 +200,16 @@ class Orderinfo extends Controller
                     return apiJsonReturn(-202, '', '下单频繁，请稍后再下-5！');
                 }
             }
+
             $url = $request->domain() . "/api/orderinfo/info" . "?order=" . $insertOrderData['order_me'];
+            if(isset($message['cami_type_sign'])&&!empty($message['cami_type_sign'])){
+                if($message['cami_type_sign']=='xiecheng'){
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
+                }
+                if($message['cami_type_sign']=='Warlmart'){
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'];
+                }
+            }
             //修改订单状态 //下单成功
             $successOrderWhere['order_me'] = $insertOrderData['order_me'];
             $successOrderUpdate['order_status'] = 4;  //下单成功-等待访问

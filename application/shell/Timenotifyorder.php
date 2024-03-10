@@ -37,21 +37,38 @@ class Timenotifyorder extends Command
                 ->where('notify_times', '<', 10)
                 ->select();
             $totalNum = count($orderData);
+
             if ($totalNum > 0) {
-                foreach ($orderData as $k => $v) {
-                    $orderWhere['order_no'] = $v['order_no'];
-                    $orderWhere['account'] = $v['account'];
-                    $notifying['do_notify'] = 1;
-                    $db::table('bsa_order')->where($orderWhere)->update($notifying);
-                    $notifyOrderRes = $orderModel->orderNotify($v);
-                    if (!isset($notifyOrderRes['code']) || $notifyOrderRes['code'] != 1000) {
-                        logs(json_encode(['orderData' => $v,
-                            "time" => date("Y-m-d H:i:s", time()),
-                            "notifyRes" => json_encode($notifyOrderRes),
-                        ]), 'ADONTDELETENotifyOrderFail');
+                logs(json_encode(['orderData' => $orderData, 'time' => date("Y-m-d H:i:s", time())]), 'timenotifyorder_first_log');
+                $closeStatusData = array();
+                foreach ($orderData as $key => $val) {
+                    $closeStatusData[$key] = $val['id'];
+                }
+                //暂时全部变更未正在回调状态  ==防止重复拿到做回调请求
+                $updateOrderCheckStatusData['do_notify'] = 1;
+                $closeOrderData = $db::table("bsa_order")->where('id', 'in', $closeStatusData)
+                    ->update($updateOrderCheckStatusData);
+
+                $doChangNotifyStatus = true;  //下次继续回调  -=--》修改订单     notify_status = 2
+                //修改订单查询状态为查询中 end
+                if (!$closeOrderData) {
+                    logs(json_encode(['$orderData' => $orderData, 'time' => date("Y-m-d H:i:s", time())]), 'timenotifyorder_closeOrderFail_log');
+                    $output->writeln("timenotifyorder:处理closeOrderFail  " . $totalNum . "--[" . date("Y-m-d H:i:s", time()) . "] ");
+                }else{
+                    foreach ($orderData as $k => $v) {
+                        $orderWhere['order_no'] = $v['order_no'];
+                        $notifyOrderRes = $orderModel->orderNotify($v);
+                        if (!isset($notifyOrderRes['code']) || $notifyOrderRes['code'] != 1000) {
+
+                            $notifying['do_notify'] = 0;
+                            logs(json_encode(['orderData' => $v,
+                                "time" => date("Y-m-d H:i:s", time()),
+                                "notifyRes" => json_encode($notifyOrderRes),
+                            ]), 'ADONTDELETENotifyOrderFail');
+                        }
+                        $notifying['do_notify'] = 0;
+                        $db::table('bsa_order')->where($orderWhere)->update($notifying);
                     }
-                    $notifying['do_notify'] = 0;
-                    $db::table('bsa_order')->where($orderWhere)->update($notifying);
                 }
             }
             $output->writeln("Timenotifyhxiao:订单总数" . $totalNum);

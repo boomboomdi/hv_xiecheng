@@ -1,15 +1,13 @@
 <?php
 
-namespace app\shell;
+namespace app\shellOldnew;
 
+use app\common\model\OrderhexiaoModel;
 use app\common\model\OrderModel;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
-
-use app\common\model\OrderhexiaoModel;
-use app\common\model\SystemConfigModel;
-use think\Db;
+use function logs;
 
 class Timeoutorder extends Command
 {
