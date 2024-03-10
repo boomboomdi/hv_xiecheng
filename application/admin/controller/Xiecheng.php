@@ -96,7 +96,7 @@ class Xiecheng extends Base
         $writeOffData = $db::table('bsa_write_off')->select();
 
         //cami_type_id   cami_type_username  cami_type_sign
-        $camiChannelData['cami_type_id'] = 1; //卡种
+        $camiChannelData['cami_type_id'] = $this->camiTypeId; //卡种id
         $camiChannelData['cami_type_username'] = $this->cardTypeSignName; //卡种名称
         $camiChannelData['cami_type_sign'] = $this->cardTypeSign; //卡种
         $this->assign([
