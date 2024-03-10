@@ -45,7 +45,7 @@ class Base extends Controller
                 }
             }
         }
-        $appName = "张三话费";
+        $appName = "DV-卡密";
         if (!empty(Config::get('app.app_name'))) {
             $appName = Config::get('app.app_name');
         }
