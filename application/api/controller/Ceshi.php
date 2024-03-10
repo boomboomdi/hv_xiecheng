@@ -21,7 +21,28 @@ use phpseclib\Crypt\AES;
 class Ceshi extends Controller
 {
 
-    public function ddd()
+    //下单
+    public function ddd1()
+    {
+//        echo "aaa";exit;
+        $db = new Db();
+        $orderWhere['order_no'] = "BJ202403101441460010796";
+        $writeWhere['write_off_sign'] = "ZHANGSANHEXIAO";
+        $order = $db::table("bsa_order")->where($orderWhere)->find();
+//        var_dump($order['rate']);exit;
+        $bsaWriteOffData = $db::table("bsa_write_off")->where($writeWhere)->find();
+        $freezeAmount = (100.00 * (1 - 0.05));
+        $db::table("bsa_write_off")
+            ->execute("UPDATE bsa_write_off  SET 
+                                            use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,
+                                            freeze_amount = freeze_amount + " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+
+        var_dump($db::table("bsa_write_off")->getLastSql());exit;
+
+    }
+    //支付失败
+    public function eee()
     {
         $db = new Db();
         $orderWhere['order_no'] = "BJ202403101441460010796";
@@ -34,6 +55,25 @@ class Ceshi extends Controller
             ->execute("UPDATE bsa_write_off  SET 
                                             use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
                                             freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+        var_dump($db::table("bsa_write_off")->getLastSql());exit;
+
+    }
+
+    //支付成功
+    public function fff()
+    {
+        $db = new Db();
+        $orderWhere['order_no'] = "BJ202403101441460010796";
+        $writeWhere['write_off_sign'] = "ZHANGSANHEXIAO";
+        $order = $db::table("bsa_order")->where($orderWhere)->find();
+//        var_dump($order['rate']);exit;
+        $bsaWriteOffData = $db::table("bsa_write_off")->where($writeWhere)->find();
+        $freezeAmount = (100.00 * (1 - 0.05));
+        $updateWriteOff = $db::table("bsa_write_off")
+            ->execute("UPDATE bsa_write_off  SET 
+                                            freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " ,
+                                            write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
                                             WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
         var_dump($db::table("bsa_write_off")->getLastSql());exit;
 

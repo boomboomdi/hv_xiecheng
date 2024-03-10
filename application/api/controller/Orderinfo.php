@@ -161,6 +161,9 @@ class Orderinfo extends Controller
             //冻结金额
             $freezeAmount = ($insertOrderData['amount'] * (1 - $useCamiChannelData['rate']));
             $writeOffModel = new WriteoffModel();
+
+            //可用金额减少   use_amount--
+            //冻结金额减少   freeze_amount--
             $updateWriteOff = $writeOffModel
                 ->execute("UPDATE bsa_write_off  SET 
                            use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,

@@ -150,8 +150,8 @@ class Checkorder extends Command
 
                                     $freezeAmount = ($v['amount'] * (1 - $rate));
 
-                                    //支付成功 核销商上压金额增加
-                                    //支付成功 核销商冻结金额金额减少
+                                    //支付失败 核销商可用金额增加
+                                    //支付成功 核销商冻结金额减少
                                     //增加核销商可用金额
                                     //减少核销商冻结金额
                                     $writeOffModel = new WriteoffModel();
@@ -203,12 +203,16 @@ class Checkorder extends Command
                                     $freezeAmount = ($v['amount'] * (1 - $rete));
 
                                     //支付成功 核销商上压金额增加
-                                    //支付成功 核销商冻结金额金额减少
                                     $updateWriteData['freeze_amount'] = $bsaWriteOffData['freeze_amount'] - number_format((float)$freezeAmount, 3);
                                     $updateWriteData['write_off_deposit'] = $bsaWriteOffData['write_off_deposit'] - number_format((float)$freezeAmount, 3);
+//                                    $updateWriteOff = $db::table("bsa_write_off")
+//                                        ->where('write_off_sign', '=', $v['write_off_sign'])
+//                                        ->update($updateWriteData);
                                     $updateWriteOff = $db::table("bsa_write_off")
-                                        ->where('write_off_sign', '=', $v['write_off_sign'])
-                                        ->update($updateWriteData);
+                                        ->execute("UPDATE bsa_write_off  SET 
+                                            freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " ,
+                                            write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 //                                    execute("UPDATE bsa_write_off  SET
 //                                                   freeze_amount = freeze_amount - " . (number_format((float)$freezeAmount, 3)) . " , write_off_deposit - " . (number_format((float)$freezeAmount, 3)) . " WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
 
