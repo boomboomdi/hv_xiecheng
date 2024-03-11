@@ -119,6 +119,8 @@ class Checkorder extends Command
                                     $doChangCheckStatus = true;  //下次继续查询
                                     $updateCheckData['check_times'] = $val['check_times'] + 1;  //查询次数加一
                                     $updateCheckData['check_status'] = 0;  //查询状态
+
+                                    $updateCheckData['next_check_time'] = time() + 30;  //下次查询时间+30
                                 }
                                 //充值失败
                                 //查询状态变更为不可查询状态   check_status =2
