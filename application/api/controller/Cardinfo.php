@@ -44,16 +44,19 @@ class Cardinfo extends Controller
         try {
             logs(json_encode(['data' => $data, "message" => $message]), 'cardUploadNotify_first');
 
+            //解压数据
+            $respondData = gzdecode($message);
+
             $appKey = "qG4UnbXxzgxdI6VU";
             $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
             $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
             $cipher = new AES(1);
             $cipher->setKey($encryptPassword);
-            $decryptedData = $cipher->decrypt($data);
+            $decryptedData = $cipher->decrypt($message);
 
             $param = gzdecode($decryptedData);
 
-            logs(json_encode(['decryptedData' => $param, 'param' => $param]), 'cardUploadNotify_log2');
+            logs(json_encode(['decryptedData' => $decryptedData, 'param' => $decryptedData]), 'cardUploadNotify_log2');
             $validate = new OrderinfoValidate();
             if (!$validate->check($param)) {
                 return apiJsonReturn(-1, '', $validate->getError());
