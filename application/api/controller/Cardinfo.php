@@ -42,8 +42,9 @@ class Cardinfo extends Controller
         $db = new Db();
         $message = $request->param();
         try {
-            logs(json_encode(['message' => $data]), 'cardUploadNotify_first');
+            logs(json_encode(['data' => $data, "message" => $message]), 'cardUploadNotify_first');
 
+            $appKey = "qG4UnbXxzgxdI6VU";
             $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
             $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
             $cipher = new AES(1);
@@ -51,7 +52,6 @@ class Cardinfo extends Controller
             $decryptedData = $cipher->decrypt($data);
 
             $param = gzdecode($decryptedData);
-
 
             logs(json_encode(['decryptedData' => $param, 'param' => $param]), 'cardUploadNotify_log2');
             $validate = new OrderinfoValidate();
