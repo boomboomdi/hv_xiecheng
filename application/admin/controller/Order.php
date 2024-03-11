@@ -12,6 +12,7 @@ use app\admin\model\OrderModel;
 use app\common\model\OrderdouyinModel;
 use app\common\model\OrderhexiaoModel;
 use think\Db;
+use tool\Log;
 
 class Order extends Base
 {
@@ -186,7 +187,186 @@ class Order extends Base
                 if ($order['order_status'] == 0 || $order['order_status'] == 3 || $order['order_status'] == 7) {
                     return json(modelReMsg(-4, '', '不可查询的订单!'));
                 }
+                if ($order['check_status'] == 2) {
+                    return json(modelReMsg(-4, '', '支付失败不可查询!'));
+                }
                 if (empty($order['order_me']) || empty($order['account']) || empty($order['order_pay'])) {
+                    return json(modelReMsg(-4, '', '此订单不可查单回调-4!'));
+                }
+                if (time() < $order['limit_time']) {
+                    return json(modelReMsg(-5, '', "不可查询时间段！"));
+                }
+                if (time() < $order['next_check_time']) {
+                    return json(modelReMsg(-5, '', "查询频繁！"));
+                }
+                if ($order['check_status'] == 1) {
+                    return json(modelReMsg(-5, '', "正在查询中稍后再查询！"));
+                }
+
+                $db = new Db();
+
+                //修改所查询数据并修改其check_status
+                $updateOrderCheckStatusData['check_status'] = 1;
+                $updateOrderCheckStatusData['next_check_time'] = time() + 10;
+                $updateOrderCheckStatusData['check_times'] = $order['check_times'] + 1;
+                $closeOrderData = $db::table("bsa_order")->where('id', $id)
+                    ->update($updateOrderCheckStatusData);
+                if (!$closeOrderData) {
+                    return json(modelReMsg(-6, '', "查询异常！"));
+                    logs(json_encode(['orderData' => $order, 'time' => date("Y-m-d H:i:s", time())]), 'checkOrder_closeOrderFail_log2');
+                }
+                Db::startTrans();
+                $appKey = "qG4UnbXxzgxdI6VU";
+                $url = "http://114.67.177.36:38088/queryCard?uploadId=" . $order['account'];  //uploadId
+                $headers = array("appKey: {$appKey}");
+//                    $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
+
+                $response = httpGET2($url, $headers);
+                $responseData = json_decode($response, true);
+
+                Log::OrderLog('主动查询', $order['order_no'], var_export($responseData, true));
+                logs(json_encode(['orderNo' => $order['order_no'], 'uploadId' => $order['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $responseData]), 'checkorder_xc_log');
+
+                /**
+                 * 查询失败
+                 */
+                //查询失败
+                $updateCheckData['check_result'] = var_export($responseData, true);
+                if ($responseData['code'] != 200 || !isset($responseData['data']) || empty($responseData['data'])) {
+                    $updateOrderCheckStatusFail['check_status'] = 0;
+                    $updateOrderCheckStatusFail['next_check_time'] = time();
+                    $db::table("bsa_order")->where('id', $id)
+                        ->update($updateOrderCheckStatusFail);
+                    $db::commit();
+                    return json(modelReMsg(-7, '', "查询异常,请联系绑卡方技术！"));
+                }
+
+                $cardDta = $responseData['data'][0];
+                //待充值, 充值中  是可再查询状态
+                if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $cardDta['state'] == '充值中')) {
+                    $updateCheckDoingPayData['check_status'] = 0;  //查询状态
+                    $updateCheckDoingPayData['next_check_time'] = time() + 10;
+                    $db::commit();
+                    $db::table("bsa_order")->where('id', $id)
+                        ->update($updateCheckDoingPayData);
+                    return json(modelReMsg(1, '', "查询成功,卡密状态为：" . $cardDta['state']));
+                }
+                if ($cardDta['state'] == '充值失败') {
+                    $db::commit();
+                    $updateOrderCheckStatusNoPay['check_status'] = 2;
+                    $db::table("bsa_order")->where('id', $id)
+                        ->update($updateOrderCheckStatusNoPay);
+                    return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']));
+                }
+                if ($cardDta['state'] == '充值成功') {
+                    $updateCheckData['order_desc'] = "支付成功-等候回调";  //支付成功状态
+                    $updateCheckData['order_status'] = 1;  //支付成功状态
+                    $updateCheckData['pay_status'] = 1;  //支付成功状态
+                    $updateCheckData['pay_time'] = time();  //支付成功状态
+                    $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
+                    if ($cardDta['amount'] != $order['amount']) {
+                        $updateCheckData['order_desc'] = "支付成功-差额订单";  //支付成功状态
+                        $updateCheckData['do_notify'] = 2;  //拒绝回调
+                        $updateCheckData['notify_status'] = 2;  //拒绝回调
+                    }
+                    //修改订单状态
+                    $updateOrderStatus = $db::table("bsa_order")->where("id", $id)
+                        ->update($updateCheckData);
+                    if (!$updateOrderStatus) {
+                        $doChangCheckStatus = true;  //下次继续查询
+                        logs(json_encode([+
+                        'action' => 'updateMatch',
+                            'updateOrderWhere' => $order['order_no'],
+                            'updateCheckData' => $updateCheckData,
+                            'updateSql' => $db::table("bsa_order")->getLastSql(),
+                            'updateOrderSuccessRes' => $updateOrderStatus,
+                        ]), 'checkOrderUpdateOrderStatus');
+                        $db::rollback();
+                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-1！"));
+                    }
+                    //修改核销商金额
+                    $bsaWriteOffData = $db::table("bsa_write_off")
+                        ->where('write_off_sign', '=', $order['write_off_sign'])
+                        ->lock(true)
+                        ->find();
+                    if (!$bsaWriteOffData) {
+                        $db::rollback();
+                        logs(json_encode([
+                            'order_no' => $order['order_no'],
+                            'errorMessage' => "pay_success_lock_write_off_fail",
+                            'last_sql' => $db::table("bsa_write_off")->getLastSql()
+                        ]), 'checkOrderLockWriteFail2');
+
+                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-2！"));
+                    }
+                    //支付成功 核销商上压金额增加
+                    $freezeAmount = ($order['amount'] * (1 - $order['rete']));
+                    //支付成功 核销商上压金额增加
+//                                    $updateWriteOff = $db::table("bsa_write_off")
+//                                        ->where('write_off_sign', '=', $v['write_off_sign'])
+//                                        ->update($updateWriteData);
+                    $updateWriteOff = $db::table("bsa_write_off")
+                        ->execute("UPDATE bsa_write_off  SET 
+                                            use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,
+                                            write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+                    if ($updateWriteOff != 1) {
+                        logs(json_encode([
+                            'updateCamiChannelWhere' => $order['write_off_sign'],
+                            'updateSql' => $db::table("bsa_write_off")->getLastSql(),
+                            'updateMatchSuccessRes' => $updateWriteOff,
+                        ]), 'checkOrderUpdateWriteOffStatus');
+                        $db::rollback();
+
+                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-3！"));
+                    }
+                }
+
+                $db::commit();
+                return json(modelReMsg(1, '', "查询成功,卡密状态为：" . $cardDta['state']));
+
+            } else {
+                return json(modelReMsg(-99, '', '访问错误'));
+            }
+        } catch (\Exception $exception) {
+            logs(json_encode(['id' => $id, 'file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'order_notify_exception');
+            return json(modelReMsg(-11, '', '通道异常'));
+        } catch (\Error $error) {
+            logs(json_encode(['id' => $id, 'file' => $error->getFile(), 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()]), 'order_notify_error');
+            return json(modelReMsg(-22, '', '通道异常'));
+        }
+    }
+
+    /**
+     * @return \think\response\Json
+     */
+    public function checkOld()
+    {
+        try {
+            if (request()->isAjax()) {
+                $id = input('param.id');
+                if (empty($id)) {
+                    return json(modelReMsg(-1, '', '参数错误!'));
+                }
+
+                logs(json_encode([
+                    'check' => "check",
+                    'id' => input('param.id')
+                ]), 'checkNotifyOrder_log');
+                //查询订单
+                $order = Db::table("bsa_order")->where("id", $id)->find();
+                if (empty($order)) {
+                    return json(modelReMsg(-2, '', '回调订单有误!'));
+                }
+
+                if ($order['order_status'] == 1) {
+                    return json(modelReMsg(-3, '', '此订单已支付!'));
+                }
+
+                if ($order['order_status'] == 0 || $order['order_status'] == 3 || $order['order_status'] == 7) {
+                    return json(modelReMsg(-4, '', '不可查询的订单!'));
+                }
+                if (empty($order['account']) || empty($order['order_pay'])) {
                     return json(modelReMsg(-4, '', '此订单不可查单回调-4!'));
                 }
                 if ((time() - $order['add_time']) < 600) {
