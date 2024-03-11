@@ -56,7 +56,7 @@ class Cardinfo extends Controller
 
             $param = gzdecode($decryptedData);
 
-            logs(json_encode(['decryptedData' => $decryptedData, 'param' => $decryptedData]), 'cardUploadNotify_log2');
+            logs(json_encode(['decryptedData' => $decryptedData, 'param' => $param]), 'cardUploadNotify_log2');
             exit;
             //待完善
             $validate = new OrderinfoValidate();
