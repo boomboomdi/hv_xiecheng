@@ -58,6 +58,7 @@ class Cardinfo extends Controller
 
             logs(json_encode(['decryptedData' => $decryptedData, 'param' => $decryptedData]), 'cardUploadNotify_log2');
             exit;
+            //待完善
             $validate = new OrderinfoValidate();
             if (!$validate->check($param)) {
                 return apiJsonReturn(-1, '', $validate->getError());
