@@ -118,7 +118,7 @@ class Cardinfo extends Controller
             }
             //充值成功
             if (isset($cardDta['state']) && $cardDta['state'] == '充值成功') {
-
+                $updateCheckData['check_result'] = var_export($message, true);
                 $db::startTrans();
 
                 //更新订单  START
