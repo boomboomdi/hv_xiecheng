@@ -8,14 +8,14 @@ class NotifycardValidate extends Validate
 {
     protected $rule = [
         'uploadId' => 'require',
-        'results' => 'require',
+        'cardList' => 'require',
         'sign' => 'require',
     ];
 
     protected $message = [
-        'uploadId.require' => 'require merchant_sign',
-        'results.max' => 'merchant_sign format error',
-        'sign.max' => 'sign format error',
+        'uploadId.require' => 'uploadId require ',
+        'cardList.require' => 'cardList require',
+        'sign.require' => 'sign require',
     ];
     protected $scene = [
         'notify' => ['merchant_sign', 'order_no', 'payment'],

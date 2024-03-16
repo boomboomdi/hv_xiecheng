@@ -39,225 +39,199 @@ class Cardinfo extends Controller
     {
 
         $data = @file_get_contents('php://input');
+        $message = json_decode($data, true);//获取 调用信息
+//
+        $appKey = "qG4UnbXxzgxdI6VU";
+        $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
+        $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
+        $headers = $request->header();
+
+//        var_dump($request->param());exit;
+
+        logs(json_encode([
+            'data' => $message,
+            "message" => $message,
+            "param" => $request->param()
+        ]), 'cardUploadNotify_first');
+        if (!isset($headers['appkey']) || empty($headers['appkey'])) {
+            return apiJsonReturn(-2, "appKey  require！");
+        }
+        if ($appKey != $headers['appkey']) {
+            return apiJsonReturn(-3, "appKey  error！");
+        }
+//        if ($request->ip() != '8.129.63.100') {
+//            return apiJsonReturn(-4, "  error ip");
+//        }
         $db = new Db();
-        $message = $request->param();
         try {
-            logs(json_encode(['data' => $data, "message" => $message]), 'cardUploadNotify_first');
-
-            //解压数据
-            $respondData = gzdecode($message);
-
-            $appKey = "qG4UnbXxzgxdI6VU";
-            $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
-            $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
-            $cipher = new AES(1);
-            $cipher->setKey($encryptPassword);
-            $decryptedData = $cipher->decrypt($message);
-
-            $param = gzdecode($decryptedData);
-
-            logs(json_encode(['decryptedData' => $decryptedData, 'param' => $param]), 'cardUploadNotify_log2');
-            exit;
-            //待完善
-            $validate = new OrderinfoValidate();
-            if (!$validate->check($param)) {
+            logs(json_encode(['data' => $message, "message" => $message]), 'cardUploadNotify_first');
+            $validate = new NotifycardValidate();
+            if (!$validate->check($message)) {
                 return apiJsonReturn(-1, '', $validate->getError());
             }
 
-            $db = new Db();
-            //merchant_sign  //商户标识
-//            $token = $db::table('bsa_merchant')->where('merchant_sign', '=', $message['merchant_sign'])->find()['token'];
-//            if (empty($token)) {
-//                return apiJsonReturn(-2, "商户验证失败！");
-//            }
-//            $sig = md5($message['merchant_sign'] . $message['order_no'] . $message['amount'] . $message['time'] . $token);
-//
-//
-//            if ($sig != $message['sign']) {
-//                logs(json_encode(['orderParam' => $message, 'doMd5' => $sig]), 'orderParamSignFail');
-//                return apiJsonReturn(-3, "验签失败！");
-//            }
-            $orderFind = $db::table('bsa_order')->where('uploadId', '=', $param['uploadId'])->count();
-            if (empty($orderFind)) {
-                return apiJsonReturn(-1, "uploadId no existed 订单不存在！");
-            }
 
-            // 根据user_id  未付款次数 限制下单 end
+            $objectMap = $message;
 
-            $orderMe = md5(uniqid() . getMillisecond());
-            $orderFind = $db::table('bsa_order')->where('order_me', '=', $orderMe)->find();
-            if (!empty($orderFind)) {
-                $orderMe = md5(uniqid() . getMillisecond());
-            }
-            $orderNoFind = $db::table('bsa_order')->where('order_no', '=', $message['order_no'])->find();
-            if (!empty($orderNoFind)) {
+            unset ($objectMap['sign']);
+            // 对字典进行排序并转换为JSON字符串
+            ksort($objectMap);
+            $jsonStr = json_encode($objectMap, JSON_UNESCAPED_SLASHES);
+            // 拼接签名字符串并计算MD5
+            $textStr = "{$appKey}{$jsonStr}{$secret}";
+            $sign = md5($textStr);
+//            if ($sign != $message['sign']) {
+//                logs(json_encode([
+//                    'data' => $message,
+//                    "message" => $message,
+//                    "param" => $request->param(),
+//                    "sign" => $sign
+//                ]), 'cardUploadNotifySignError');
+//
+//                return apiJsonReturn(-4, "sign  error！");
+//            }
+
+
+            $orderData = $db::table('bsa_order')->where('account', '=', $message['uploadId'])->find();
+            if (empty($orderNoFind)) {
                 return apiJsonReturn(-5, "该订单号已存在！");
             }
-            //order_no   //商户订单号
-            //payment   //支付方式（alipay：支付宝，wechat：微信）
-            //notify_url  //回调通知地址
-            //sign  //签名
-            //cami_type_sign  Walmart   沃尔玛
-            //沃尔玛  Walmart
-            //查找通道  bsa_cami_write   by  card_type,pay_type,
-            //根据卡种 、分配订单。
-            //1、插入初始订单信息  --
-            //拼接参数
-            $insertOrderData['merchant_sign'] = $message['merchant_sign'];  //商户
-            $insertOrderData['amount'] = $message['amount']; //支付金额
-            $insertOrderData['order_no'] = $message['order_no'];  //商户订单号
-            $insertOrderData['cami_type_sign'] = $message['cami_type_sign'];  //卡密标识
-            ;  // 0、等待下单 1、支付成功（下单成功）！2、支付失败（下单成功）！3、下单失败！4、等待支付（下单成功）！5、已手动回调。
-            $insertOrderData['order_status'] = 0; //状态
-            $insertOrderData['order_me'] = $orderMe; //本平台订单号
-            $insertOrderData['payable_amount'] = $message['amount'];  //应付金额
-            $insertOrderData['payment'] = $message['payment']; //alipay
-            $insertOrderData['add_time'] = time();  //入库时间
-            $insertOrderData['notify_url'] = $message['notify_url']; //下单回调地址 notify url
-            $insertOrderData['order_desc'] = "等待匹配!"; //订单描述
-            $centent = "下单金额：" . $insertOrderData['amount'] . ":" . $insertOrderData['cami_type_sign'] . $insertOrderData['order_desc'];
-            $orderModel = new OrderModel();
-            $createOrderOne = $orderModel->addOrder($insertOrderData);
-            if (!isset($createOrderOne['code']) || $createOrderOne['code'] != 0) {
-                logs(json_encode(['action' => 'getUseHxOrderRes',
-                    'insertOrderData' => $insertOrderData,
-                    'createOrderOne' => $createOrderOne,
-                    'lastSal' => $db::order("bsa_order")->getLastSql()
-                ]), 'addOrderFail_log');
-                return apiJsonReturn(-101, "下单有误！");
+
+            if ($orderData['pay_status'] == 1) {
+                return apiJsonReturn(-5, "该订单号已存在！");
             }
-//            $logData = var_export($param, true);
-            Log::OrderLog($insertOrderData['merchant_sign'], $insertOrderData['order_no'], $centent);
+            $cardDta = $message['cardList'][0];
+            if (isset($cardDta['cardName']) && $cardDta['cardName'] != $orderData['cami_account'] || !isset($cardDta['state'])) {
+                logs(json_encode(
+                    [
+                        'data' => $message,
+                        "message" => $message,
+                        "param" => $request->param(),
+                        'orderNo' => $orderData['order_no'],
+                        'uploadId' => $orderData['account'],
+                        'notifyresponse' => $cardDta,
+                        'time' => date("Y-m-d H:i:s", time()),
+                    ]
+                ), 'cardUploadNotify_differentcardName_log');
 
-            //2、绑定通道：
-            //a、更新额度
-            //b、更新订单
-            //3、返回引导页面
-
-            $camiChannelModel = new CamiChannelModel();
-            $searchData['cami_type_sign'] = $message['cami_type_sign'];  //卡密类型
-            $searchData['payment'] = $message['payment']; //支付方式
-            $searchData['amount'] = $message['amount']; //订单金额
-            $useCamiChannel = $camiChannelModel->getUseCamiChannel($searchData);
-            if ($useCamiChannel['code'] != 0 || empty($useCamiChannel['data'])) {
-                $content = $useCamiChannel['msg'];
-                Log::OrderLog($insertOrderData['merchant_sign'], $insertOrderData['order_no'], $content);
-                $orderWhere1['order_me'] = $insertOrderData['order_me'];
-
-                $update1['order_status'] = 3;  //订单状态
-                $update1['order_desc'] = "匹配核销通通道：" . $useCamiChannel['msg'];  //
-                //修改订单状态为下单失败
-                $db::table("bsa_order")->where($orderWhere1)->update($update1);
-                return apiJsonReturn(-102, "下单失败,无可用通道！");
+                return apiJsonReturn(-6, "cardName different！");
             }
+            //充值成功
+            if (isset($cardDta['state']) && $cardDta['state'] == '充值成功') {
 
-            //绑定核销服务商
+                $db::startTrans();
 
-            //创建绑定核销服务商订单  -
-            $orderLimitTime = SystemConfigModel::getOrderLockTime();
-            $useCamiChannelData = $useCamiChannel['data'];
-            $db::startTrans();
-            //冻结 核销服务商订单金额  >write_off => 增加冻结金额 -》减少可用金额   >100更新绑定服务商状态
-            $bsaWriteOff = $db::table("bsa_write_off")
-                ->where('write_off_id', $useCamiChannelData['write_off_id'])
-                ->lock(true)
-                ->find();
-            if (!$bsaWriteOff) {
-                $db::rollback();
-                return apiJsonReturn(-201, "无可匹配订单！");
-            }
+                //更新订单  START
+                $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['uploadId'])->lock(true)->find();
+                if (!$orderFind) {
+                    logs(json_encode(
+                        [
+                            'data' => $message,
+                            "message" => $message,
+                            "param" => $request->param(),
+                            'orderNo' => $orderData['order_no'],
+                            'uploadId' => $orderData['account'],
+                            'notifyresponse' => $cardDta,
+                            'time' => date("Y-m-d H:i:s", time()),
+                        ]
+                    ), 'cardUploadNotifyLockOrderFailLog');
+                    $db::rollback();
+                    return apiJsonReturn(-102, "exception ！");
+                }
+                //修改订单状态  == = = = 成功
+                $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：等候回调";  //支付成功状态
+                $updateCheckData['order_status'] = 1;  //支付成功状态
+                $updateCheckData['pay_status'] = 1;  //支付成功状态
+                $updateCheckData['pay_time'] = time();  //支付成功状态
+                $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
+                if ($cardDta['amount'] != $orderFind['amount']) {
+                    $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回";  //支付成功状态
+                    $updateCheckData['do_notify'] = 2;  //拒绝回调
+                    $updateCheckData['notify_status'] = 2;  //拒绝回调
+                }
 
+                $updateCheckWhere['order_no'] = $orderFind['order_no'];
+                $updateOrderStatus = $db::table("bsa_order")->where($updateCheckWhere)
+                    ->update($updateCheckData);
+                if (!$updateOrderStatus) {
 
-            //更新核销商金额
-            //冻结金额
-            $freezeAmount = ($insertOrderData['amount'] * (1 - $useCamiChannelData['rate']));
-//            $updateWriteData['freeze_amount'] = bcadd($bsaWriteOff['freeze_amount'], $freezeAmount, 3); //冻结金额增加
-//            $updateWriteData['use_amount'] = bcsub($bsaWriteOff['write_off_deposit'], $freezeAmount, 3); //可用金额减少
-//            var_dump((1 - $useCamiChannelData['rate']));
-//            var_dump($freezeAmount);
-//            exit;
-            $writeOffModel = new WriteoffModel();
-//            $updateWriteOff = $writeOffModel
-//                ->where('write_off_id', '=', $useCamiChannelData['write_off_id'])
-//                ->setDec('use_amount', $freezeAmount);
-//            $updateWriteOff1 = $writeOffModel
-//                ->where('write_off_id', '=', $useCamiChannelData['write_off_id'])
-//                ->setDec('use_amount', $freezeAmount);
-            $updateWriteOff = $writeOffModel
-                ->execute("UPDATE bsa_write_off  SET use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " , freeze_amount = freeze_amount + " . (number_format($freezeAmount, 3)) . "  WHERE  write_off_id = " . $useCamiChannelData['write_off_id']);
-//            var_dump($updateWriteOff);exit;
-            if ($updateWriteOff != 1) {
-                $db::rollback();
-                logs(json_encode([
+                    $db::rollback();
+                    logs(json_encode([+
                     'action' => 'updateMatch',
-                    'updateCamiChannelWhere' => $useCamiChannelData['write_off_id'],
-                    'updateCamiChannelData' => $freezeAmount,
-                    'updateSql' => $db::table("bsa_write_off")->getLastSql(),
-                    'updateMatchSuccessRes' => $updateWriteOff,
-                ]), 'updateWriteOffStatusFail');
-                return apiJsonReturn(-203, "无可匹配订单！");
-            }
-            $bsaWriteOff = $db::table("bsa_write_off")
-                ->where('write_off_id', '=', $useCamiChannelData['write_off_id'])
-                ->find();
-            //如果核销服务商余额小于100 关闭其匹配订单功能
-            if ($bsaWriteOff['use_amount'] < 100) {
-                $updateWriteData['status'] = 2;//核销服务商状态关闭。
-                //核销通道状态关闭
-                $updateCamiChannelWhere['write_off_id'] = $useCamiChannelData['write_off_id'];
-                $updateCamiChannelData['order_status'] = 2;
-                $closeStatus = $db::table('bsa_cami_write')->where($updateCamiChannelWhere)->update($updateCamiChannelData);
-                if (!$closeStatus) {
+                        'updateOrderWhere' => $updateCheckWhere,
+                        'updateCheckData' => $updateCheckData,
+                        'updateSql' => $db::table("bsa_order")->getLastSql(),
+                        'updateOrderSuccessRes' => $updateOrderStatus,
+                    ]), 'checkOrderUpdateOrderStatus');
+
+                    return apiJsonReturn(-103, "exception ！");
+                }
+                //更新订单  END
+                //修改核销商金额
+                $bsaWriteOffData = $db::table("bsa_write_off")
+                    ->where('write_off_sign', '=', $orderFind['write_off_sign'])
+                    ->lock(true)
+                    ->find();
+                if (!$bsaWriteOffData) {
                     $db::rollback();
                     logs(json_encode([
-                        'action' => 'updateMatch',
-                        'updateCamiChannelWhere' => $updateCamiChannelWhere,
-                        'updateCamiChannelData' => $updateCamiChannelData,
-                        'updateMatchSuccessRes' => $closeStatus,
-                    ]), 'updateCamiWriteStatusFail');
-                    return apiJsonReturn(-202, '', '下单频繁，请稍后再下-5！');
+                        'order_no' => $orderFind['order_no'],
+                        'errorMessage' => "pay_success_lock_write_off_fail",
+                        'last_sql' => $db::table("bsa_write_off")->getLastSql()
+                    ]), 'notifyOrderLockWriteFail2');
+
+                    return apiJsonReturn(-104, "exception！");
                 }
-            }
-            $url = $request->domain() . "/api/orderinfo/info" . "?order=" . $insertOrderData['order_me'];
-            //修改订单状态 //下单成功
-            $successOrderWhere['order_me'] = $insertOrderData['order_me'];
-            $successOrderUpdate['order_status'] = 4;  //下单成功-等待访问
-            $successOrderUpdate['write_off_sign'] = $bsaWriteOff['write_off_sign'];   //匹配核销单核销商标识
-            $orderLimitTime = SystemConfigModel::getOrderLockTime();
-            $successOrderUpdate['order_limit_time'] = (time() + $orderLimitTime);  //订单表 $orderLimitTime
-            $successOrderUpdate['operator'] = $useCamiChannelData['cami_type_sign']; //移动联通电信  /沃尔玛京东E卡。。。
-            $successOrderUpdate['qr_url'] = $url; //支付订单
-            $successOrderUpdate['order_desc'] = "等待访问!"; //订单描述
-            $updateSuccessOrderRes = $orderModel->where($successOrderWhere)->update($successOrderUpdate);
 
-            if (!$updateSuccessOrderRes) {
-                Log::OrderLog($insertOrderData['merchant_sign'], $insertOrderData['order_no'], "下单失败！联系技术：301");
-                logs(json_encode([
-                    'action' => 'updateSuccessOrder',
-                    'Where' => $successOrderWhere,
-                    'updateMatch' => $successOrderUpdate,
-                    'updateSql' => $db::table("bsa_order")->getLastSql(),
-                    'updateMatchSuccessRes' => $updateSuccessOrderRes,
-                ]), 'updateUpdateSuccessOrderFail');
-                $db::rollback();
-                return apiJsonReturn(-204, '', '下单频繁，联系技术：-204！');
+                $rateWhere['write_off_sign'] = $orderFind['write_off_sign'];
+                $rateWhere['cami_type_sign'] = $orderFind['operator'];
+                $rete = $db::table("bsa_cami_write")->where($rateWhere)->find()['rate'];
+                $freezeAmount = ($orderFind['amount'] * (1 - $rete));
+
+                //支付成功 核销商上压金额增加
+                $updateWriteData['freeze_amount'] = $bsaWriteOffData['freeze_amount'] - number_format((float)$freezeAmount, 3);
+                $updateWriteData['write_off_deposit'] = $bsaWriteOffData['write_off_deposit'] - number_format((float)$freezeAmount, 3);
+//                                    $updateWriteOff = $db::table("bsa_write_off")
+//                                        ->where('write_off_sign', '=', $v['write_off_sign'])
+//                                        ->update($updateWriteData);
+                $updateWriteOff = $db::table("bsa_write_off")
+                    ->execute("UPDATE bsa_write_off  SET 
+                                            freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " ,
+                                            write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+//                                    execute("UPDATE bsa_write_off  SET
+//                                                   freeze_amount = freeze_amount - " . (number_format((float)$freezeAmount, 3)) . " , write_off_deposit - " . (number_format((float)$freezeAmount, 3)) . " WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+
+                if ($updateWriteOff != 1) {
+
+                    logs(json_encode([
+                        'updateCamiChannelWhere' => $orderFind['write_off_sign'],
+                        'updateSql' => $db::table("bsa_write_off")->getLastSql(),
+                        'updateMatchSuccessRes' => $updateWriteOff,
+                    ]), 'notifyOrderUpdateWriteOffStatus');
+                    $db::rollback();
+
+                    return apiJsonReturn(-105, "exception！");
+                }
+                $db::commit();
+                echo "success";exit;
             }
 
-            Log::OrderLog($insertOrderData['merchant_sign'], $insertOrderData['order_no'], "下单匹配成功！" . $url);
-            $db::commit();
-            return json(msg(200, $url, "下单成功"));
+
+
+            return json(msg(111,  "error"));
         } catch (\Error $error) {
 
             logs(json_encode(['file' => $error->getFile(),
                 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()
-            ]), 'orderError');
+            ]), 'cardUploadNotifyError');
             return json(msg(-22, '', "接口异常!-22"));
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'errorMessage' => $exception->getMessage(),
                 'lastSql' => $db::table('bsa_order')->getLastSql(),
-            ]), 'orderException');
+            ]), 'cardUploadNotifyException');
             return json(msg(-11, '', "接口异常!-11"));
         }
     }

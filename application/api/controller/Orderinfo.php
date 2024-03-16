@@ -400,7 +400,7 @@ class Orderinfo extends Controller
                     'message' => $message,
                     'lockRes' => $orderInfo,
                 ]), 'orderInfoFail');
-                echo '访问繁忙，重新下单！';
+                echo '访问繁忙，重新下单！';exit;
             }
             //可支付状态
             if ($orderInfo['order_status'] != 4) {
@@ -522,6 +522,10 @@ class Orderinfo extends Controller
             }
             if (!empty($orderData['cami_account'])) {
                 return json(['code' => -3, 'msg' => '订单正在正在核销中，请勿重新提交！', 'data' => []]);
+            }
+
+            if (time() > $orderData['order_limit_time']) {
+                return json(['code' => -3, 'msg' => '订单超时，请重新下单！', 'data' => []]);
             }
 
             try {
