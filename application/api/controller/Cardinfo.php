@@ -94,6 +94,11 @@ class Cardinfo extends Controller
 
             $orderData = $db::table('bsa_order')->where('account', '=', $message['uploadId'])->find();
             if (empty($orderNoFind)) {
+
+                logs(json_encode([
+                    'data' => $message,
+                    "lastSql" => $db::table('bsa_order')->getLastSql()
+                ]), 'cardUploadNotify_5');
                 return apiJsonReturn(-5, "该订单号不存在！");
             }
 
@@ -215,12 +220,12 @@ class Cardinfo extends Controller
                     return apiJsonReturn(-105, "exception！");
                 }
                 $db::commit();
-                echo "success";exit;
+                echo "success";
+                exit;
             }
 
 
-
-            return json(msg(111,  "error"));
+            return json(msg(111, "error"));
         } catch (\Error $error) {
 
             logs(json_encode(['file' => $error->getFile(),
