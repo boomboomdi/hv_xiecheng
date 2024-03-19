@@ -94,11 +94,12 @@ class Cardinfo extends Controller
 
             $orderData = $db::table('bsa_order')->where('account', '=', $message['uploadId'])->find();
             if (empty($orderNoFind)) {
-                return apiJsonReturn(-5, "该订单号已存在！");
+                return apiJsonReturn(-5, "该订单号不存在！");
             }
 
             if ($orderData['pay_status'] == 1) {
-                return apiJsonReturn(-5, "该订单号已存在！");
+                echo "success";
+                return apiJsonReturn(-5, "该订单号已支付成功！");
             }
             $cardDta = $message['cardList'][0];
             if (isset($cardDta['cardName']) && $cardDta['cardName'] != $orderData['cami_account'] || !isset($cardDta['state'])) {
