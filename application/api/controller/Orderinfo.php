@@ -600,8 +600,9 @@ class Orderinfo extends Controller
                 $updateData2['upload_time'] = date("Y-m-d H:i:s", time());
                 if ($responseData['code'] != 200) {
                     $updateData2['upload_status'] = 2;
-                    $updateData2['order_desc'] = "上传请求失败" . $responseData['msg'];
+                    $updateData2['order_desc'] = "上传请求返回：" . $responseData['msg'];
                 }
+
                 $update2 = $orderModel->where($where)->update($updateData2);
                 if (!$update2) {
                     return json(['code' => -5, 'msg' => '提交失败，请重新下单提交！', 'data' => []]);
