@@ -93,7 +93,7 @@ class Cardinfo extends Controller
 
 
             $orderData = $db::table('bsa_order')->where('account', '=', $message['uploadId'])->find();
-            if (empty($orderNoFind)) {
+            if (empty($orderData)) {
 
                 logs(json_encode([
                     'data' => $message,
