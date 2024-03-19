@@ -128,6 +128,7 @@ class Cardinfo extends Controller
                 $db::startTrans();
 
                 //更新订单  START
+                //1、lock order start
                 $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['id'])->lock(true)->find();
                 if (!$orderFind) {
                     logs(json_encode(
@@ -144,7 +145,8 @@ class Cardinfo extends Controller
                     $db::rollback();
                     return apiJsonReturn(-102, "exception ！");
                 }
-                //修改订单状态  == = = = 成功
+                //1、lock order end
+                //2、修改订单状态  == = = = 成功  start
                 $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：等候回调";  //支付成功状态
                 $updateCheckData['order_status'] = 1;  //支付成功状态
                 $updateCheckData['pay_status'] = 1;  //支付成功状态
@@ -156,7 +158,7 @@ class Cardinfo extends Controller
                     $updateCheckData['do_notify'] = 2;  //拒绝回调
                     $updateCheckData['notify_status'] = 2;  //拒绝回调
                 }
-                //如果订单金额与卡密金额不符合  ====
+                //如果订单金额与卡密金额不符合  ====  end
                 $updateCheckWhere['order_no'] = $orderFind['order_no'];
                 $updateOrderStatus = $db::table("bsa_order")->where($updateCheckWhere)
                     ->update($updateCheckData);
@@ -169,7 +171,6 @@ class Cardinfo extends Controller
                         'updateSql' => $db::table("bsa_order")->getLastSql(),
                         'updateOrderSuccessRes' => $updateOrderStatus,
                     ]), 'checkOrderUpdateOrderStatus');
-
                     return apiJsonReturn(-103, "exception ！");
                 }
                 //更新订单  END
