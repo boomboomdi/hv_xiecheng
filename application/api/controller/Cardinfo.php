@@ -128,7 +128,7 @@ class Cardinfo extends Controller
                 $db::startTrans();
 
                 //更新订单  START
-                $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['account'])->lock(true)->find();
+                $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['id'])->lock(true)->find();
                 if (!$orderFind) {
                     logs(json_encode(
                         [
