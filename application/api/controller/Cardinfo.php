@@ -80,16 +80,16 @@ class Cardinfo extends Controller
             // 拼接签名字符串并计算MD5
             $textStr = "{$appKey}{$jsonStr}{$secret}";
             $sign = md5($textStr);
-//            if ($sign != $message['sign']) {
-//                logs(json_encode([
-//                    'data' => $message,
-//                    "message" => $message,
-//                    "param" => $request->param(),
-//                    "sign" => $sign
-//                ]), 'cardUploadNotifySignError');
-//
-//                return apiJsonReturn(-4, "sign  error！");
-//            }
+            if ($sign != $message['sign']) {
+                logs(json_encode([
+                    'data' => $message,
+                    "message" => $message,
+                    "param" => $request->param(),
+                    "sign" => $sign
+                ]), 'cardUploadNotifySignError');
+
+                return apiJsonReturn(-4, "sign  error！");
+            }
 
 
             $orderData = $db::table('bsa_order')->where('account', '=', $message['uploadId'])->find();
