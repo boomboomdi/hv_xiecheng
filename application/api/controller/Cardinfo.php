@@ -150,17 +150,17 @@ class Cardinfo extends Controller
                 $updateCheckData['pay_status'] = 1;  //支付成功状态
                 $updateCheckData['pay_time'] = time();  //支付成功状态
                 $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
+                //如果订单金额与卡密金额不符合  ====
                 if ($cardDta['amount'] != $orderFind['amount']) {
                     $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回";  //支付成功状态
                     $updateCheckData['do_notify'] = 2;  //拒绝回调
                     $updateCheckData['notify_status'] = 2;  //拒绝回调
                 }
-
+                //如果订单金额与卡密金额不符合  ====
                 $updateCheckWhere['order_no'] = $orderFind['order_no'];
                 $updateOrderStatus = $db::table("bsa_order")->where($updateCheckWhere)
                     ->update($updateCheckData);
                 if (!$updateOrderStatus) {
-
                     $db::rollback();
                     logs(json_encode([+
                     'action' => 'updateMatch',
