@@ -300,7 +300,7 @@ class Order extends Base
                         return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-2！"));
                     }
                     //支付成功 核销商上压金额增加
-                    $freezeAmount = ($order['amount'] * (1 - $order['rete']));
+                    $freezeAmount = ($order['amount'] * (1 - $order['rate']));
                     //支付成功 核销商上压金额增加
 //                                    $updateWriteOff = $db::table("bsa_write_off")
 //                                        ->where('write_off_sign', '=', $v['write_off_sign'])
