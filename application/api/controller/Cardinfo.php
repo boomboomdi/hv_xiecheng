@@ -96,6 +96,7 @@ class Cardinfo extends Controller
             }
 
 
+            logs(json_encode(['data' => $message, "message" => $message]), 'cardUploadNotify_two');
             $orderData = $db::table('bsa_order')->where('account', '=', $message['uploadId'])->find();
             if (empty($orderData)) {
 
