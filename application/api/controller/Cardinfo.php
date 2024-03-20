@@ -59,9 +59,9 @@ class Cardinfo extends Controller
         if ($appKey != $headers['appkey']) {
             return apiJsonReturn(-3, "appKey  error！");
         }
-//        if ($request->ip() != '8.129.63.100') {
-//            return apiJsonReturn(-4, "  error ip");
-//        }
+        if ($request->ip() != '8.129.63.100') {
+            return apiJsonReturn(-4, "  error ip");
+        }
         $db = new Db();
         try {
             logs(json_encode(['data' => $message, "message" => $message]), 'cardUploadNotify_first');
