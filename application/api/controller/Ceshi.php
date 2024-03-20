@@ -21,14 +21,46 @@ use phpseclib\Crypt\AES;
 class Ceshi extends Controller
 {
 
-    public function aea()
+    public function aa1(Request $request)
     {
-        $data = Db::table("bsa_order")
-            ->field("SUM(actual_amount) as totalOrderAmount")
-            ->where("write_off_sign", '=', '王大拿')
-            ->find()['totalOrderAmount'];
-        var_dump($data);exit;
-        var_dump(Db::table("bsa_order")->getLastSql());
+        $data = @file_get_contents('php://input');
+        $message = json_decode($data, true);//获取 调用信息
+        $appKey = "qG4UnbXxzgxdI6VU";
+        $secret = "X5WwO3OlrGNFTXn35Dut2MBqJFZLl9NU";
+        $encryptPassword = "VhClL3zB55pfCN8mdIJpt9B3VwLNCRMd";
+        $headers = $request->header();
+        $objectMap = $message;
+        if (is_array($objectMap['cardList'])) {
+//            var_dump($objectMap['cardList'][]);exit;
+            foreach ($objectMap['cardList'] as $k => $v) {
+//                var_dump($k);exit;
+                ksort($objectMap['cardList'][$k]);
+            }
+        }
+
+        ksort($objectMap);
+//        var_dump($objectMap);
+
+        $objectMap = json_encode($objectMap);
+        return $objectMap;exit;
+//        exit;
+        unset ($objectMap['sign']);
+        // 对字典进行排序并转换为JSON字符串
+        $checkSignData = $objectMap;
+        if (is_array($checkSignData['cardList'])) {
+            //删除原数组cardList数据
+            unset($objectMap['cardList']);
+            $checkSignCardListData = $checkSignData['cardList'];
+            foreach ($checkSignCardListData as $k => $v) {
+                unset($checkSignCardListData[$k]);
+                $sortData = $v;
+                ksort($sortData);
+                $checkSignCardListData[] = $sortData;
+            }
+            ksort($checkSignCardListData);
+            //填充新的cardList数据
+            $objectMap['cardList'] = $checkSignCardListData;
+        }
     }
 
     //下单

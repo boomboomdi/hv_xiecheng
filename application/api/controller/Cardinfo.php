@@ -70,24 +70,13 @@ class Cardinfo extends Controller
                 return apiJsonReturn(-1, '', $validate->getError());
             }
 
-
             $objectMap = $message;
             unset ($objectMap['sign']);
             // 对字典进行排序并转换为JSON字符串
-            $checkSignData = $objectMap;
-            if (is_array($checkSignData['cardList'])) {
-                //删除原数组cardList数据
-                unset($objectMap['cardList']);
-                $checkSignCardListData = $checkSignData['cardList'];
-                foreach ($checkSignCardListData as $k => $v) {
-                    unset($checkSignCardListData[$k]);
-                    $sortData = $v;
-                    ksort($sortData);
-                    $checkSignCardListData[] = $sortData;
+            if (is_array($objectMap['cardList'])) {
+                foreach ($objectMap['cardList'] as $k => $v) {
+                    ksort($objectMap['cardList'][$k]);
                 }
-                ksort($checkSignCardListData);
-                //填充新的cardList数据
-                $objectMap['cardList'] = $checkSignCardListData;
             }
 
             ksort($objectMap);
