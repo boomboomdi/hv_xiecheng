@@ -193,9 +193,9 @@ class Order extends Base
                 if (empty($order['order_me']) || empty($order['account']) || empty($order['order_pay'])) {
                     return json(modelReMsg(-4, '', '此订单不可查单回调-4!'));
                 }
-                if (time() < $order['limit_time']) {
-                    return json(modelReMsg(-5, '', "不可查询时间段！"));
-                }
+//                if (time() < $order['limit_time']) {
+//                    return json(modelReMsg(-5, '', "不可查询时间段！"));
+//                }
                 if (time() < $order['next_check_time']) {
                     return json(modelReMsg(-5, '', "查询频繁！"));
                 }
