@@ -59,9 +59,9 @@ class Cardinfo extends Controller
         if ($appKey != $headers['appkey']) {
             return apiJsonReturn(-3, "appKey  error！");
         }
-        if ($request->ip() != '8.129.63.100') {
-            return apiJsonReturn(-4, "  error ip");
-        }
+//        if ($request->ip() != '8.129.63.100') {
+//            return apiJsonReturn(-4, "  error ip");
+//        }
         $db = new Db();
         try {
             logs(json_encode(['data' => $message, "message" => $message]), 'cardUploadNotify_first');
@@ -72,9 +72,24 @@ class Cardinfo extends Controller
 
 
             $objectMap = $message;
-
             unset ($objectMap['sign']);
             // 对字典进行排序并转换为JSON字符串
+            $checkSignData = $objectMap;
+            if (is_array($checkSignData['cardList'])) {
+                //删除原数组cardList数据
+                unset($objectMap['cardList']);
+                $checkSignCardListData = $checkSignData['cardList'];
+                foreach ($checkSignCardListData as $k => $v) {
+                    unset($checkSignCardListData[$k]);
+                    $sortData = $v;
+                    ksort($sortData);
+                    $checkSignCardListData[] = $sortData;
+                }
+                ksort($checkSignCardListData);
+                //填充新的cardList数据
+                $objectMap['cardList'] = $checkSignCardListData;
+            }
+
             ksort($objectMap);
             $jsonStr = json_encode($objectMap, JSON_UNESCAPED_SLASHES);
             // 拼接签名字符串并计算MD5
@@ -88,7 +103,7 @@ class Cardinfo extends Controller
                     "sign" => $sign
                 ]), 'cardUploadNotifySignError');
 
-//                return apiJsonReturn(-4, "sign  error！");
+                return apiJsonReturn(-4, "sign  error！");
             }
 
 
