@@ -63,6 +63,25 @@ class Ceshi extends Controller
         }
     }
 
+    public function aa2(Request $request)
+    {
+        $data = @file_get_contents('php://input');
+        $message = json_decode($data, true);//获取 调用信息
+
+        $objectMap = $message;
+        if (is_array($objectMap['cardList'])) {
+//            var_dump($objectMap['cardList'][]);exit;
+            foreach ($objectMap['cardList'] as $k => $v) {
+//                var_dump($k);exit;
+                ksort($objectMap['cardList'][$k]);
+            }
+        }
+
+        ksort($objectMap);
+        $jsonStr = json_encode($objectMap, JSON_UNESCAPED_SLASHES);
+
+        return $jsonStr;
+    }
     //下单
     public function ddd1()
     {

@@ -92,7 +92,7 @@ class Cardinfo extends Controller
                     "sign" => $sign
                 ]), 'cardUploadNotifySignError');
 
-                return apiJsonReturn(-4, "sign  error！");
+//                return apiJsonReturn(-4, "sign  error！");
             }
 
 
