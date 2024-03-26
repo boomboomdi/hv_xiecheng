@@ -277,7 +277,7 @@ class Cardinfo extends Controller
         $db = new Db();
         try {
             $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367';
-            logs(json_encode(['data' => $message, "message" => $message]), 'cardUploadNotify_first');
+            logs(json_encode(['data' => $message, "message" => $message]), 'TslcardUploadNotify_first');
             $param = $message['data'];
             unset($param['message']);
             ksort($param);
