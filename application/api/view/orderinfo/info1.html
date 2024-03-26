@@ -4,11 +4,11 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <title>回收卡密</title>
+    <title>携程电子卡回收卡密</title>
     <meta name="description" content="支付">
     <meta name="keywords" content="支付">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/cami1/jquery.js"></script>
+    <script src="/static/jquery.js"></script>
     <link rel="stylesheet" href="/static/n_main.css">
     <link rel="stylesheet" href="/static/pay.css">
     <script type="text/javascript" src="/static/layer.js"></script>
@@ -115,7 +115,8 @@
                                 <div class="popviewhead-back c_payment_popview_head_back"
                                      data-name="popviewhead-back"></div>
                                 <span class="popviewhead-title c_payment_popview_head_title"
-                                      id="card_name_title">{$orderData['camiTypeName']}{$orderData['amount']}元</span></div>
+                                      id="card_name_title">沃尔玛电子卡{$orderData['amount']}元</span>
+                            </div>
                             <div id="c_payment_topNotice"></div> <!--订单模块-->
                             <div class="p-index-paybill" id="c_payment_index_OrderDetail_box">
                                 <div class="bill-title">
@@ -123,7 +124,7 @@
                                         注意：请注意购买对应的卡类别和面额
                                     </div>
 
-                                    订单号：<i id="orderNo">{$orderData['orderNo']}</i>
+                                    订单号：<i id="orderNo">{$orderData['order_no']}</i>
                                 </div>
                                 <div class="cir-ico"><i class="cir-ico-line"></i></div>
                                 <div class="bill-price">
@@ -132,7 +133,8 @@
                                         <div class="bill-price-row1">
                                             <span class="bill-price-main">
                                             <span class="corange">
-                                                 <span class="cfont18 bold" id="card_name">{$orderData['camiTypeName']}{$orderData['amount']}元</span>
+                                                 <span class="cfont18 bold"
+                                                       id="card_name">沃尔玛电子卡：面额{$orderData['amount']}元</span>
                                             </span>
                                             </span>
                                         </div>
@@ -144,7 +146,8 @@
                                         <div class="bill-price-row1"><span class="bill-price-main">
                                             <span class="corange"> <span class="font12">¥ </span>
                                             <span class="cfont18 bold" id="amount2"> {$orderData['amount']}</span>
-                                                <input type="hidden" value="{$orderData['orderMe']}" name="orderid" id="orderid">
+                                                <input type="hidden" value="{$orderData['order_me']}" name="order"
+                                                       id="order">
                                             <span class="font12 bold">.00</span>
                                             </span> </span>
                                         </div>
@@ -178,8 +181,6 @@
                                     </a>
                                 </div>
 
-
-
                                 <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">
                                     <a class="p-n-index-btn" id="c_payment_index_payBtn_taobao"
                                        style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
@@ -201,7 +202,6 @@
                                        style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
                                        href="">点击跳转到拼多多购买</a>
                                 </div>
-
                                 <div id="c_payment_index_schema_tips"
                                      class="p-index-n-coupon corange pay-index-aimated fade-in-down"
                                      style="display: none; opacity: 0;"></div> <!--礼品卡节点-->
@@ -213,7 +213,7 @@
                                     <ul>
                                         <li>操作步骤：</li>
                                         <li>请在淘宝/京东过/抖音/快手购买卡密</li>
-                                        <li>请在商城搜索并购买<span class="h4 text-danger" name='cardname'></span></li>
+                                        <li>请在商城搜索并购买<span class="h4 text-danger" name='cardname'>沃尔玛</span></li>
                                         <li>付款时候账号随便填写，付款成功后点击订单详情</li>
                                         <li>点击联系客服获取卡号和密码，正确输入卡号和密码，一定点击确认提交！</li>
                                         <li>
@@ -298,11 +298,10 @@
                                 })
                             </script>
                             <script>
-                                var cardName;
-                                var prompt;
+                                var cardName = '携程电子卡';
                                 var cardNoLenth;
                                 var pwdNoLenth;
-                                var prompt;
+                                var prompt = '{$orderData["camiTypeName"]}';
                                 var type;
                                 var isTip = false;
                                 document.oncontextmenu = function () {
@@ -339,13 +338,14 @@
                                 check();
 
                                 getOrderById();
+
                                 tishi();
 
 
                                 function tishi() {
-                                    if (isTip) {
+                                    if (true) {
                                         var tip = "<span style='font-size:18px;color:red'>使用帮助</span><br><br>" +
-                                            "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px; background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);'>" + cardName + "</span><br><br>" +
+                                            "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px; background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);'> 沃尔玛</span><br><br>" +
                                             "<span style='font-size:18px;'>1.请购买正确卡密，否则无法使用</span><br><br>" +
                                             "<span style='font-size:18px;'>2.注意：</span><span style='color:red;font-size:22px;'>" + prompt + "</span><br><br>" +
                                             "<span style='font-size:16px;'>3.购买后 <span style='background-image: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);'>[无需确认收货]</span>（商家要求提前确认的为无法使用的卡密）</span><br><br>" +
@@ -503,10 +503,11 @@
                                             layer.closeAll();
                                             var msg = data.msg;
 
+                                            alert(msg);
                                             console.log(data);
                                             // console.log(orderNo);
                                             if (0 == data.code) {
-                                                // alert(msg);
+                                                alert(msg);
                                                 location.reload();
                                             } else {
                                                 alert(msg);
@@ -602,6 +603,5 @@
                             </script>
 
 
-                            </i>
 </body>
 </html>

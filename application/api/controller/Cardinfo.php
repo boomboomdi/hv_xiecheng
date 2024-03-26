@@ -257,6 +257,7 @@ class Cardinfo extends Controller
      */
     public function cardNotify(Request $request)
     {
+        //162.209.166.42
 
         $data = @file_get_contents('php://input');
         $message = json_decode($data, true);//获取 调用信息

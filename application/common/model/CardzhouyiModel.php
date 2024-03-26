@@ -22,12 +22,12 @@ class CardzhouyiModel extends Model
 //    protected $desc;
 //    protected $notifyIp;
 
-//    protected $merchant_no = '100000400975290';
-//    protected $secret = 'c636c426342afa2d159bda64a7f989d2';
-//    protected $url = 'http://162.209.190.84/api/pay';
-//    protected $payType = 'alipay';
-//    protected $checkUrl = 'http://162.209.190.84/api/queryOrder';
-//    protected $desc = 'http://120.79.228.128:10086/doc/2/';
+//对接文档：http://120.79.228.128:10086/doc/2/
+//商户号：
+//商户密钥：
+//下单地址：http://162.209.166.46/api/order
+//查单地址：http://162.209.166.46/api/info
+//回调ip：162.209.166.42
 
 //merchantId	是	string	商户号（租户ID）
 //actionType	是	int	绑卡固定传2
@@ -46,6 +46,7 @@ class CardzhouyiModel extends Model
     public function upload($cardData)
     {
         try {
+            $url = 'http://162.209.166.46/api/order';
             $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367';
             $uploadData['merchantId'] = 1726613164899012608;
             $uploadData['actionType'] = 2;
@@ -54,7 +55,7 @@ class CardzhouyiModel extends Model
             $uploadData['notify'] = 1;
             $uploadData['bizOrderNo'] = $cardData['orderNo'];
             $uploadData['bizNotifyUrl'] = $cardData['bizNotifyUrl'];
-            $uploadData['expectAmount'] = int($cardData['amount']) * 10;
+            $uploadData['expectAmount'] = (int)$cardData['amount'] * 10;
             $uploadData['expectCardType'] = 23;
 
             //sign = MD5('a=1&b=2&c=3&secret=xxxxxxxxxxxxxxxxx')
@@ -68,8 +69,10 @@ class CardzhouyiModel extends Model
 
             $postParam = json_encode($postParam);
 
-            $notifyResult = curlPostJson($this->url, $postParam);
-            $responseData = json_decode($notifyResult);
+            $notifyResult = curlPostJson($url, $postParam);
+            $responseData = json_decode($notifyResult, true);
+            logs(json_encode(['param' => $postParam,
+                'responseData' => $responseData]), 'Cardzhouyiuploadlog');
 //            {
 //                "code": 200,
 //                "success": true,
@@ -79,9 +82,18 @@ class CardzhouyiModel extends Model
                 return modelReMsg(-2, $responseData, '上传失败' . $responseData['message']);
             }
             return modelReMsg(0, $responseData, "上传成功");
-        } catch (\Exception $e) {
-            return modelReMsg(-11, '', $e->getMessage());
+        } catch (\Exception $exception) {
+            logs(json_encode(['param' => $cardData,
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'errorMessage' => $exception->getMessage()]), 'CardzhouyiModelException');
+            return modelReMsg(-11, '', $exception->getMessage());
         } catch (\Error $error) {
+            logs(json_encode(['param' => $cardData,
+                'file' => $error->getFile(),
+                'line' => $error->getLine(),
+                'errorMessage' => $error->getMessage()]), 'CardzhouyiModelError');
+            return modelReMsg(-11, '', $error->getMessage());
             return modelReMsg(-12, '', $error->getMessage());
         }
     }

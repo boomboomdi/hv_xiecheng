@@ -695,15 +695,6 @@ class Orderinfo extends Controller
                 if (!$update) {
                     return json(['code' => -22, 'msg' => '提交失败，请截图联系客服！', 'data' => []]);
                 }
-//                {
-//                    "merchant_no": "100000737061396", //商户ID：后台获取
-//                    "out_order_no": "20220825120048860", //商户订单号
-//                    "amount": "1", //订单金额  ： 单位元
-//                    "pay_type": "alipay", //支付方式：alipay(固定)
-//                    "card_type":"woem"//见⬇️通道编码
-//                    "notify_url": "http://www.baidu.com", //回调地址，订单支付成功我方将向该地址发起回调
-//                    "sign": "b76457ea5dac7458053bd41d4333e696" //签名（merchant_no + out_order_no +amount + pay_type + notify_url +  secretKey）
-//                }
                 $ZhouyiModel = new CardzhouyiModel();
 
                 $cardData['cami_account'] = $param['acceptCardNo'];
@@ -711,7 +702,7 @@ class Orderinfo extends Controller
                 $cardData['orderNo'] = $where['order_me'];
                 $cardData['bizNotifyUrl'] = $request->domain() . "/api/cardinfo/cardNotify";
                 $cardData['amount'] = $orderData['amount'];
-                $response = $ZhouyiModel->upload($param);
+                $response = $ZhouyiModel->upload($cardData);
 
 
                 $updateData2['upload_status'] = 1;
@@ -735,14 +726,14 @@ class Orderinfo extends Controller
                 logs(json_encode(['param' => $param,
                     'file' => $exception->getFile(),
                     'line' => $exception->getLine(),
-                    'errorMessage' => $exception->getMessage()]), 'uploadCardException');
+                    'errorMessage' => $exception->getMessage()]), 'uploadCard2Exception');
 
-                return json(['code' => -11, 'msg' => 'uploadCard exception!' . $exception->getMessage()]);
+                return json(['code' => -112, 'msg' => 'uploadCard exception!' . $exception->getMessage()]);
             } catch (\Error $error) {
                 logs(json_encode(['param' => $param,
                     'file' => $error->getFile(),
                     'line' => $error->getLine(),
-                    'errorMessage' => $error->getMessage()]), 'uploadCardError');
+                    'errorMessage' => $error->getMessage()]), 'uploadCard2Error');
 
                 return json(['code' => -22, 'msg' => 'uploadCard error!' . $error->getMessage()]);
             }
