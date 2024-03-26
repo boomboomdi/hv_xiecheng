@@ -44,7 +44,6 @@ class Writeoff extends Base
                     ->find()['totalOrderAmount'];
 
 
-
                 //剩余可用单量
                 $data[$key]['canOrderAmountNum'] = Db::table("bsa_order_hexiao")
                     ->where("write_off_sign", '=', $vo['write_off_sign'])
@@ -80,6 +79,9 @@ class Writeoff extends Base
             //商户id   加密密钥       secretkey  签名密钥
             $param['token'] = $param['token'];  //token
             $param['secret_key'] = $param['secret_key'];   //密钥
+            if (!isset($param['write_off_username'])) {
+                $param['write_off_username'] = $param['write_off_sign'];   //密钥
+            }
 //            $param['weight'] = $param['weight'];
             $param['status'] = $param['status'];
             $param['write_off_deposit'] = $param['write_off_deposit'];
