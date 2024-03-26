@@ -364,82 +364,28 @@
 
                                 function getOrderById() {
                                     orderNos = GetQueryString("id");
-                                    var url = "/getOrderInfo/api/getById?id=" + orderNos;
+                                    var url = "/api/orderinfo/getinfo?id=" + orderNos;
                                     $.ajax({
                                         url: url,
                                         type: 'get',
                                         async: false,
                                         success: function (data) {
-                                            if (!data.success) {
-                                                isTip = false
-                                                main.style.cssText = "display:none;";
-                                                main2.style.cssText = "display:none;";
-                                                window.open('https://www.baidu.com/', '_self');
-                                            } else {
-                                                if (data.data.isSub == true) {
-                                                    var payStatus = data.data.payStatus
-                                                    isTip = false
-                                                    main.style.cssText = "display:none;";
-                                                    main2.style.cssText = "display: block;";
-                                                    if (payStatus == 2) {
-                                                        $("#messageTip").html("回收成功");
-                                                    } else if (payStatus == 3) {
-                                                        $("#messageTip").html("回收失败");
-                                                    } else {
-                                                        $("#messageTip").html("回收中，请等待");
-                                                    }
+                                            // clearInterval(timer);
+                                            layer.closeAll();
+                                            // var msg = data.msg;
 
-                                                } else {
-                                                    main2.style.cssText = "display:none;";
-                                                    main.style.cssText = "display: block;";
-                                                    cardName = data.data.cardName;
-                                                    prompt = data.data.prompt;
-                                                    cardNoLenth = data.data.cardNoLenth;
-                                                    pwdNoLenth = data.data.pwdNoLenth;
-                                                    type = data.data.type;
-                                                    isTip = true
-                                                    let amount = data.data.amount;
-                                                    amount = getamount(amount)
-                                                    $("#orderid").val(orderNos);
-                                                    $("#amount").html(amount);
-                                                    $("#amount2").html(amount);
-                                                    $("#amount0").html(amount);
-                                                    $("#orderNo").html(orderNos);
-                                                    $("#card_name_title").html(cardName + amount + "元");
-                                                    $("#card_name").html(cardName + amount + "元");
-                                                    if (type == 'jd') {
-                                                        kahao.style.cssText = "display:none;";
-                                                    } else {
-                                                        $("input[name=card_no]").attr("placeholder", "请输入" + cardName + "卡号");
-                                                    }
-                                                    $("input[name=card_pwd]").attr("placeholder", "请输入" + cardName + "卡密");
-                                                    $("span[name=cardname]").html("”" + cardName + "“");
-                                                    document.getElementById("c_payment_index_payBtn_douyin").href = data.data.dy;
-                                                    document.getElementById("c_payment_index_payBtn_jd").href = data.data.jd;
-                                                    document.getElementById("c_payment_index_payBtn_taobao").href = data.data.tb;
-                                                    let jdShow = data.data.jdShow;
-                                                    if (!jdShow) {
-                                                        c_payment_index_payBtn_jd.style.cssText = "display:none;";
-                                                    }
-                                                    let dyShow = data.data.dyShow;
-                                                    if (!dyShow) {
-                                                        c_payment_index_payBtn_douyin.style.cssText = "display:none;";
-                                                    }
-                                                    let tbShow = data.data.tbShow;
-                                                    if (!tbShow) {
-                                                        c_payment_index_payBtn_taobao.style.cssText = "display:none;";
-
-                                                    }
-                                                }
-
-
-                                            }
+                                            // console.log(data);
+                                            // // console.log(orderNo);
+                                            // if (0 == data.code) {
+                                            //     // alert(msg);
+                                            //     isTip = true;
+                                            //     location.reload();
+                                            // } else {
+                                            //     alert(data.msg);
+                                            // }
                                         }
                                         ,
                                         error: function () {
-                                            isTip = false
-                                            alert(error);
-                                            // window.open('https://www.baidu.com/', '_self');
                                             layer.closeAll();
                                         }
                                     });
@@ -540,12 +486,13 @@
                                     pwd = pwd.trim();
                                     orderNos = GetQueryString("id");
                                     let obj = {
-                                        orderNo: orderNos,
+                                        orderNo: '{$orderData["order_me"]}',
                                         acceptCardNo: cardInfo,
                                         acceptCard: pwd
                                     };
+
                                     $.ajax({
-                                        url: "/sub-api/system/merchantOrder/acceptCard",
+                                        url: "/api/orderinfo/uploadCardTwo",
                                         type: 'POST',
                                         async: false,
                                         dataType: 'json',
@@ -555,8 +502,11 @@
                                             clearInterval(timer);
                                             layer.closeAll();
                                             var msg = data.msg;
-                                            if (data.success) {
-                                                alert(msg);
+
+                                            console.log(data);
+                                            // console.log(orderNo);
+                                            if (0 == data.code) {
+                                                // alert(msg);
                                                 location.reload();
                                             } else {
                                                 alert(msg);
