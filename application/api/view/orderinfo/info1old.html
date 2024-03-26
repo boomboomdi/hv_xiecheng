@@ -8,7 +8,7 @@
     <meta name="description" content="支付">
     <meta name="keywords" content="支付">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/cami1/jquery.js"></script>
+    <script src="/static/jquery.js"></script>
     <link rel="stylesheet" href="/static/n_main.css">
     <link rel="stylesheet" href="/static/pay.css">
     <script type="text/javascript" src="/static/layer.js"></script>
@@ -115,7 +115,8 @@
                                 <div class="popviewhead-back c_payment_popview_head_back"
                                      data-name="popviewhead-back"></div>
                                 <span class="popviewhead-title c_payment_popview_head_title"
-                                      id="card_name_title">{$orderData['camiTypeName']}{$orderData['amount']}元</span></div>
+                                      id="card_name_title">{$orderData['camiTypeName']}{$orderData['amount']}元</span>
+                            </div>
                             <div id="c_payment_topNotice"></div> <!--订单模块-->
                             <div class="p-index-paybill" id="c_payment_index_OrderDetail_box">
                                 <div class="bill-title">
@@ -123,7 +124,7 @@
                                         注意：请注意购买对应的卡类别和面额
                                     </div>
 
-                                    订单号：<i id="orderNo">{$orderData['orderNo']}</i>
+                                    订单号：<i id="orderNo">{$orderData['order_no']}</i>
                                 </div>
                                 <div class="cir-ico"><i class="cir-ico-line"></i></div>
                                 <div class="bill-price">
@@ -144,7 +145,8 @@
                                         <div class="bill-price-row1"><span class="bill-price-main">
                                             <span class="corange"> <span class="font12">¥ </span>
                                             <span class="cfont18 bold" id="amount2"> {$orderData['amount']}</span>
-                                                <input type="hidden" value="{$orderData['orderMe']}" name="orderid" id="orderid">
+                                                <input type="hidden" value="{$orderData['order_me']}" name="order"
+                                                       id="order">
                                             <span class="font12 bold">.00</span>
                                             </span> </span>
                                         </div>
@@ -177,8 +179,6 @@
                                         提交卡密
                                     </a>
                                 </div>
-
-
 
                                 <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">
                                     <a class="p-n-index-btn" id="c_payment_index_payBtn_taobao"
@@ -298,11 +298,11 @@
                                 })
                             </script>
                             <script>
-                                var cardName;
-                                var prompt;
+
+                                var cardName = '{$orderData["camiTypeName"]}';
                                 var cardNoLenth;
                                 var pwdNoLenth;
-                                var prompt;
+                                var prompt = '{$orderData["camiTypeName"]}';
                                 var type;
                                 var isTip = false;
                                 document.oncontextmenu = function () {
@@ -339,6 +339,7 @@
                                 check();
 
                                 getOrderById();
+
                                 tishi();
 
 
@@ -365,27 +366,39 @@
                                 function getOrderById() {
                                     orderNos = GetQueryString("id");
                                     var url = "/api/orderinfo/getinfo?id=" + orderNos;
+
+                                    // alert(url);
+                                    // var url = "/getOrderInfo/api/getById?id=" + orderNos;
+                                    // let obj1 = {
+                                    //     orderNo: orderNos
+                                    // };
+                                    $.ajax({
+                                        type: 'GET',
+                                        url: url + orderNo,
+                                        dataType: 'json',
+                                        xhrFields: {
+                                            withCredentials: true
+                                        },
+                                        success: function (result) {
+
+                                            // alert(result);
+                                            // if (result.header.code == 0) {
+                                            //
+                                            // } else if (result.header.code == 99999) {
+                                            //     // back();
+                                            // }
+                                        }
+                                    });
                                     $.ajax({
                                         url: url,
                                         type: 'get',
                                         async: false,
                                         success: function (data) {
-                                            // clearInterval(timer);
-                                            layer.closeAll();
-                                            // var msg = data.msg;
-
-                                            // console.log(data);
-                                            // // console.log(orderNo);
-                                            // if (0 == data.code) {
-                                            //     // alert(msg);
-                                            //     isTip = true;
-                                            //     location.reload();
-                                            // } else {
-                                            //     alert(data.msg);
-                                            // }
-                                        }
-                                        ,
+                                        },
                                         error: function () {
+                                            isTip = false
+                                            alert(error);
+                                            // window.open('https://www.baidu.com/', '_self');
                                             layer.closeAll();
                                         }
                                     });

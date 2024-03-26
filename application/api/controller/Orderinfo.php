@@ -213,7 +213,7 @@ class Orderinfo extends Controller
                     $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=xiecheng";
                 }
                 if ($message['cami_type_sign'] == 'Walmart') {
-                    $url = $request->domain() . "/api/orderinfo/shop1" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=Walmart";
+                    $url = $request->domain() . "/api/orderinfo/info" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=Walmart";
                 }
             }
             //修改订单状态 //下单成功
@@ -327,6 +327,21 @@ class Orderinfo extends Controller
             }
             $orderWhere['order_status'] = 4;  //下单成功-等待访问
             $orderWhere['order_me'] = $message['order'];  //下单成功-等待访问
+            $orderModel = new OrderModel();
+            $orderInfo = $orderModel
+                ->where($orderWhere)
+                ->find();
+            if (empty($orderInfo)) {
+                logs(json_encode([
+                    'action' => 'info',
+                    'message' => $message,
+                    'lockRes' => $orderInfo,
+                ]), 'orderInfoFail');
+                echo '访问繁忙，重新下单！';
+                exit;
+            }
+            $orderWhere['order_status'] = 4;  //下单成功-等待访问
+            $orderWhere['order_me'] = $message['order'];  //下单成功-等待访问
 
             $db = new Db();
             $orderModel = new OrderModel();
@@ -371,6 +386,7 @@ class Orderinfo extends Controller
         }
 
     }
+
 
 
     /**
