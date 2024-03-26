@@ -61,17 +61,21 @@ class CardzhouyiModel extends Model
             //sign = MD5('a=1&b=2&c=3&secret=xxxxxxxxxxxxxxxxx')
             ksort($uploadData);
 
-            $sign = md5(http_build_query($uploadData, "&") . "&secret=" . $secret);
-
+            $strobj = $uploadData;
+            $sign = urldecode(http_build_query($strobj,"&"));
+            $sign = str_replace(' ','',$sign);
+            $sign = md5($sign . "&secret=" . $secret);
             $postParam['sign'] = $sign;
             $postParam['data'] = $uploadData;
-
 
             $postParam = json_encode($postParam);
 
             $notifyResult = curlPostJson($url, $postParam);
             $responseData = json_decode($notifyResult, true);
-            logs(json_encode(['param' => var_export($postParam,true),
+            logs(json_encode([
+                'param' => $postParam,
+                'signstr' => json_decode(http_build_query($strobj, "&"). "&secret=" . $secret),
+                'sign' => md5(json_decode(http_build_query($strobj, "&")) . "&secret=" . $secret),
                 'responseData' => var_export($responseData,true)]), 'Cardzhouyiuploadlog');
 //            {
 //                "code": 200,

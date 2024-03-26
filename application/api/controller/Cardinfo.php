@@ -281,7 +281,10 @@ class Cardinfo extends Controller
             $param = $message['data'];
             unset($param['message']);
             ksort($param);
-            $sign = $sign = md5(http_build_query($param, "&") . "&secret=" . $secret);
+            $sign = urldecode(http_build_query($param,"&"));
+            $sign = str_replace(' ','',$sign);
+            $sign = md5($sign . "&secret=" . $secret);
+
             if ($message['sign'] != $sign) {
                 return apiJsonReturn(-2, 'sign error', $validate->getError());
             }
