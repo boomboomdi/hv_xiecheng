@@ -71,8 +71,8 @@ class CardzhouyiModel extends Model
 
             $notifyResult = curlPostJson($url, $postParam);
             $responseData = json_decode($notifyResult, true);
-            logs(json_encode(['param' => $postParam,
-                'responseData' => $responseData]), 'Cardzhouyiuploadlog');
+            logs(json_encode(['param' => var_export($postParam,true),
+                'responseData' => var_export($responseData,true)]), 'Cardzhouyiuploadlog');
 //            {
 //                "code": 200,
 //                "success": true,
