@@ -9,6 +9,7 @@ use phpseclib\Crypt\AES;
 use think\Controller;
 use think\Db;
 use app\common\model\CamiChannelModel;
+use app\common\model\CardzhouyiModel;
 use app\common\model\OrderhexiaoModel;
 use app\common\model\OrderModel;
 use app\api\validate\OrderinfoValidate;
@@ -212,7 +213,7 @@ class Orderinfo extends Controller
                     $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=xiecheng";
                 }
                 if ($message['cami_type_sign'] == 'Warlmart') {
-                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=xiecheng";
+                    $url = $request->domain() . "/api/orderinfo/info2" . "?order=" . $insertOrderData['order_me'] . "&cami_type_name=Warlmart";
                 }
             }
             //修改订单状态 //下单成功
@@ -400,7 +401,8 @@ class Orderinfo extends Controller
                     'message' => $message,
                     'lockRes' => $orderInfo,
                 ]), 'orderInfoFail');
-                echo '访问繁忙，重新下单！';exit;
+                echo '访问繁忙，重新下单！';
+                exit;
             }
             //可支付状态
             if ($orderInfo['order_status'] != 4) {
@@ -627,6 +629,110 @@ class Orderinfo extends Controller
             }
         }
     }
+
+
+    /**
+     *
+     * orderNo: orderNos,
+     * acceptCardNo: cardInfo,
+     * acceptCard: pwd
+     * 客户上传卡密   沃尔玛
+     * @return void
+     */
+    public function uploadCardTwo(Request $request)
+    {
+        if (request()->isPost()) {
+            $param = input('post.');
+            $orderModel = new OrderModel();
+            if (!isset($param['orderNo']) || !isset($param['acceptCardNo']) || !isset($param['acceptCard'])) {
+                return json(['code' => -1000, 'msg' => '数据无效！', 'data' => []]);
+            }
+            logs(json_encode(['message' => $param, 'line' => 366]), 'uploadCard_fist');
+            $where['order_me'] = $param['orderNo'];
+            //查询订单状态
+            $orderData = $orderModel->where($where)->find();
+            if (empty($orderData)) {
+                return json(['code' => -1, 'msg' => '上传无此订单！', 'data' => []]);
+            }
+            if (!empty($orderData['cami_account'])) {
+                return json(['code' => -3, 'msg' => '订单正在正在核销中，请勿重新提交！', 'data' => []]);
+            }
+
+            if (time() > $orderData['order_limit_time']) {
+                return json(['code' => -3, 'msg' => '订单超时，请重新下单！', 'data' => []]);
+            }
+
+            try {
+                //卡密
+                $hasWhere['cami_account'] = $param['acceptCardNo'];
+                $hasWhere['cami_password'] = $param['acceptCard'];
+                $hasWhere['order_status'] = 1;
+                $isHasOrderData = $orderModel->where($hasWhere)->find();
+
+                if ($isHasOrderData) {
+                    return json(['code' => -12, 'msg' => '卡密已上传，请勿重新提交提交！', 'data' => []]);
+                }
+                $updateData['cami_account'] = $param['acceptCardNo'];
+                $updateData['cami_password'] = $param['acceptCard'];
+                $updateData['order_desc'] = "上传卡密成功，正在请求核销";
+                $update = $orderModel->where($where)->update($updateData);
+                if (!$update) {
+                    return json(['code' => -22, 'msg' => '提交失败，请截图联系客服！', 'data' => []]);
+                }
+//                {
+//                    "merchant_no": "100000737061396", //商户ID：后台获取
+//                    "out_order_no": "20220825120048860", //商户订单号
+//                    "amount": "1", //订单金额  ： 单位元
+//                    "pay_type": "alipay", //支付方式：alipay(固定)
+//                    "card_type":"woem"//见⬇️通道编码
+//                    "notify_url": "http://www.baidu.com", //回调地址，订单支付成功我方将向该地址发起回调
+//                    "sign": "b76457ea5dac7458053bd41d4333e696" //签名（merchant_no + out_order_no +amount + pay_type + notify_url +  secretKey）
+//                }
+                $ZhouyiModel = new CardzhouyiModel();
+
+                $cardData['cami_account'] = $param['acceptCardNo'];
+                $cardData['cami_password'] = $param['acceptCard'];
+                $cardData['orderNo'] = $where['order_me'];
+                $cardData['bizNotifyUrl'] = $request->domain() . "/api/cardinfo/cardNotify";
+                $cardData['amount'] = $orderData['amount'];
+                $response = $ZhouyiModel->upload($param);
+
+
+                $updateData2['upload_status'] = 1;
+                $updateData2['check_result'] = $response['msg'];
+
+                $updateData2['upload_time'] = date("Y-m-d H:i:s", time());
+                if ($response['code'] != 0) {
+                    $updateData2['upload_status'] = 2;
+                    $updateData2['order_desc'] = "上传请求返回：" . $response['msg'];
+                }
+
+
+                $update2 = $orderModel->where($where)->update($updateData2);
+                if (!$update2) {
+                    return json(['code' => -5, 'msg' => '提交失败，请重新下单提交！', 'data' => []]);
+                }
+                logs(json_encode(['message' => $param, 'uploadData' => $cardData, 'response' => $response]), 'uploadCard_first');
+                //请求核销通道
+                return json(['code' => $response['code'], 'msg' => $response['msg'], 'data' => []]);
+            } catch (\Exception $exception) {
+                logs(json_encode(['param' => $param,
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
+                    'errorMessage' => $exception->getMessage()]), 'uploadCardException');
+
+                return json(['code' => -11, 'msg' => 'uploadCard exception!' . $exception->getMessage()]);
+            } catch (\Error $error) {
+                logs(json_encode(['param' => $param,
+                    'file' => $error->getFile(),
+                    'line' => $error->getLine(),
+                    'errorMessage' => $error->getMessage()]), 'uploadCardError');
+
+                return json(['code' => -22, 'msg' => 'uploadCard error!' . $error->getMessage()]);
+            }
+        }
+    }
+
 
     /**
      * 引导页面查询订单状态

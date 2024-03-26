@@ -68,6 +68,8 @@ class Ceshi extends Controller
         $data = @file_get_contents('php://input');
         $message = json_decode($data, true);//获取 调用信息
 
+        $sign = http_build_query($message,"&");
+        var_dump($sign);exit;
         $objectMap = $message;
         if (is_array($objectMap['cardList'])) {
 //            var_dump($objectMap['cardList'][]);exit;
