@@ -172,7 +172,9 @@ class Writeoff extends Base
 //            ];
             $update = $db::table('bsa_write_off')->where($where)
                 ->setInc('write_off_deposit', $param['add_write_off_deposit']);
-            if (!$update) {
+            $update2 = $db::table('bsa_write_off')->where($where)
+                ->setInc('use_amount', $param['add_write_off_deposit']);
+            if (!$update||!$update2) {
                 $db::rollback();
                 return json(['code' => -4, 'data' => '', 'msg' => "系统繁忙2"]);
             }
