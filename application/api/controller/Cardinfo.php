@@ -339,7 +339,7 @@ class Cardinfo extends Controller
                         ]
                     ), 'cardUploadNotifyLockOrderFailLog');
                     $db::rollback();
-                    return apiJsonReturn(-102, "exception 11！");
+                    return apiJsonReturn(-301, "exception -301！");
                 }
                 //1、lock order end
                 //2、修改订单状态  == = = = 成功  start
@@ -367,7 +367,7 @@ class Cardinfo extends Controller
                         'updateSql' => $db::table("bsa_order")->getLastSql(),
                         'updateOrderSuccessRes' => $updateOrderStatus,
                     ]), 'checkOrderUpdateOrderStatus');
-                    return apiJsonReturn(-103, "exception ！");
+                    return apiJsonReturn(-302, "exception -302！");
                 }
                 //更新订单  END
                 //修改核销商金额
@@ -383,7 +383,7 @@ class Cardinfo extends Controller
                         'last_sql' => $db::table("bsa_write_off")->getLastSql()
                     ]), 'notifyOrderLockWriteFail2');
 
-                    return apiJsonReturn(-104, "exception！");
+                    return apiJsonReturn(-303, "exception-303！");
                 }
 
                 $rateWhere['write_off_sign'] = $orderFind['write_off_sign'];
@@ -414,7 +414,7 @@ class Cardinfo extends Controller
                     ]), 'notifyOrderUpdateWriteOffStatus');
                     $db::rollback();
 
-                    return apiJsonReturn(-105, "exception！");
+                    return apiJsonReturn(-304, "exception -304！");
                 }
                 $db::commit();
                 return "success";
@@ -431,8 +431,26 @@ class Cardinfo extends Controller
                 //1、lock order start
                 $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['id'])->lock(true)->find();
                 $updateCheckData['order_status'] = 2;  //支付状态支付失败
-                $updateCheckData['order_desc'] = "卡密充值失败";  //支付状态支付失败
+                $updateCheckData['check_result'] = var_export($message['data']);  //
+                $updateCheckData['order_desc'] = $message['data']['message'];  //支付状态支付失败
+                $updateCheckData['do_notify'] = 2;  //拒绝回调
+                $updateCheckData['notify_status'] = 2;  //拒绝回调
+                $updateCheckWhere['order_no'] = $orderFind['order_no'];
+                $updateOrderStatus = $db::table("bsa_order")->where($updateCheckWhere)
+                    ->update($updateCheckData);
+                if (!$updateOrderStatus) {
+                    $db::rollback();
+                    logs(json_encode([+
+                    'action' => 'updateMatch',
+                        'updateOrderWhere' => $updateCheckWhere,
+                        'updateCheckData' => $updateCheckData,
+                        'updateSql' => $db::table("bsa_order")->getLastSql(),
+                        'updateOrderSuccessRes' => $updateOrderStatus,
+                    ]), 'checkOrderUpdateOrderStatus');
+                    return apiJsonReturn(-401, "exception -401！");
+                }
 
+                //更新订单  END
                 //支付失败 修改核销商金额
                 $bsaWriteOffData = $db::table("bsa_write_off")
                     ->where('write_off_sign', $orderFind['write_off_sign'])
@@ -472,7 +490,7 @@ class Cardinfo extends Controller
                         'updateMatchSuccessRes' => $updateWriteOff,
                     ]), 'checkOrderUpdateWriteOffStatus2');
                     $db::rollback();
-                    return apiJsonReturn(-195, "exception！");
+                    return apiJsonReturn(-402, "exception -402！");
                 }
 
                 $db::commit();
@@ -492,7 +510,7 @@ class Cardinfo extends Controller
                 'line' => $exception->getLine(),
                 'errorMessage' => $exception->getMessage(),
                 'lastSql' => $db::table('bsa_order')->getLastSql(),
-            ]), 'cardUploadNotifyException');
+            ]), 'cardUploadNotifyException2');
             return json(msg(-11, '', "接口异常!-11"));
         }
     }
