@@ -308,9 +308,9 @@ class Cardinfo extends Controller
                 ]), 'cardUploadNotify_5');
                 return apiJsonReturn(-5, "order does not exist！");
             }
-
             if ($orderData['pay_status'] == 1 || $orderData['pay_status'] == 2) {
                 echo "success";
+                exit;
                 return apiJsonReturn(-5, "该订单号已支付成功或者已失败！");
             }
 
@@ -350,7 +350,7 @@ class Cardinfo extends Controller
                 $updateCheckData['actual_amount'] = $param['amount'];  //支付绑定金额
                 //如果订单金额与卡密金额不符合  ====
                 if ($param['bindState'] == '201') {
-                    $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回";  //支付成功状态
+                    $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回" . $param['cardAmount'];  //支付成功状态
                     $updateCheckData['do_notify'] = 2;  //拒绝回调
                     $updateCheckData['notify_status'] = 2;  //拒绝回调
                 }
@@ -425,14 +425,14 @@ class Cardinfo extends Controller
             //511	已被绑定过的卡密
             //500	失败状态（其他失败原因
             if (isset($param['bindState']) && ($param['bindState'] == '511' || $param['bindState'] == '500')) {
+//                echo "111";exit;
                 $db::startTrans();
-
                 //更新订单  START
                 //1、lock order start
                 $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['id'])->lock(true)->find();
                 $updateCheckData['order_status'] = 2;  //支付状态支付失败
                 $updateCheckData['check_result'] = var_export($message['data']);  //
-                $updateCheckData['order_desc'] = $message['data']['message'];  //支付状态支付失败
+                $updateCheckData['order_desc'] = json_decode(sprintf('"%s"', $message['data']['message']));  //支付状态支付失败
                 $updateCheckData['do_notify'] = 2;  //拒绝回调
                 $updateCheckData['pay_status'] = 2;  //支付失败--最终状态
                 $updateCheckData['notify_status'] = 2;  //拒绝回调
@@ -484,7 +484,6 @@ class Cardinfo extends Controller
 
                 if ($updateWriteOff != 1) {
 
-                    $doChangCheckStatus = true;  //下次继续查询
                     logs(json_encode([
                         'updateCamiChannelWhere' => $orderFind['write_off_sign'],
                         'updateSql' => $db::table("bsa_write_off")->getLastSql(),
