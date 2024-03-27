@@ -467,7 +467,7 @@ class Cardinfo extends Controller
 
                     $doChangCheckStatus = true;  //下次继续查询
                     logs(json_encode([
-                        'updateCamiChannelWhere' => $v['write_off_sign'],
+                        'updateCamiChannelWhere' => $orderFind['write_off_sign'],
                         'updateSql' => $db::table("bsa_write_off")->getLastSql(),
                         'updateMatchSuccessRes' => $updateWriteOff,
                     ]), 'checkOrderUpdateWriteOffStatus2');
