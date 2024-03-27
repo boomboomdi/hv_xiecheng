@@ -285,16 +285,16 @@ class Cardinfo extends Controller
             unset($param['message']);
             ksort($param);
             $sign = "";
-            foreach ($param as $k=>$v){
+            foreach ($param as $k => $v) {
 //                $sign .= "&".$k."=".$v;
-                if ($k == 'cardTypeName'){
-                    $sign .= "&".$k."=".json_decode('"'.$v.'"', true);
-                }else{
-                    $sign .= "&".$k."=".$v;
+                if ($k == 'cardTypeName') {
+                    $sign .= "&" . $k . "=" . json_decode('"' . $v . '"', true);
+                } else {
+                    $sign .= "&" . $k . "=" . $v;
                 }
             }
 
-            $sign = substr($sign,1);
+            $sign = substr($sign, 1);
 
             $sign = md5($sign . "&secret=" . $secret);
             if ($message['sign'] != $sign) {
@@ -309,9 +309,9 @@ class Cardinfo extends Controller
                 return apiJsonReturn(-5, "order does not exist！");
             }
 
-            if ($orderData['pay_status'] == 1) {
+            if ($orderData['pay_status'] == 1 || $orderData['pay_status'] == 2) {
                 echo "success";
-                return apiJsonReturn(-5, "该订单号已支付成功！");
+                return apiJsonReturn(-5, "该订单号已支付成功或者已失败！");
             }
 
             //充值成功
@@ -434,14 +434,15 @@ class Cardinfo extends Controller
                 $updateCheckData['check_result'] = var_export($message['data']);  //
                 $updateCheckData['order_desc'] = $message['data']['message'];  //支付状态支付失败
                 $updateCheckData['do_notify'] = 2;  //拒绝回调
+                $updateCheckData['pay_status'] = 2;  //支付失败--最终状态
                 $updateCheckData['notify_status'] = 2;  //拒绝回调
                 $updateCheckWhere['order_no'] = $orderFind['order_no'];
                 $updateOrderStatus = $db::table("bsa_order")->where($updateCheckWhere)
                     ->update($updateCheckData);
                 if (!$updateOrderStatus) {
                     $db::rollback();
-                    logs(json_encode([+
-                    'action' => 'updateMatch',
+                    logs(json_encode([
+                        'action' => 'updateMatch',
                         'updateOrderWhere' => $updateCheckWhere,
                         'updateCheckData' => $updateCheckData,
                         'updateSql' => $db::table("bsa_order")->getLastSql(),
@@ -504,14 +505,14 @@ class Cardinfo extends Controller
             logs(json_encode(['file' => $error->getFile(),
                 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()
             ]), 'cardUploadNotifyError2');
-            return json(msg(-22, '', "接口异常!-22"));
+            return json(msg(-222, '', "接口异常!-222"));
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'errorMessage' => $exception->getMessage(),
                 'lastSql' => $db::table('bsa_order')->getLastSql(),
             ]), 'cardUploadNotifyException2');
-            return json(msg(-11, '', "接口异常!-11"));
+            return json(msg(-111, '', "接口异常!-111"));
         }
     }
 
