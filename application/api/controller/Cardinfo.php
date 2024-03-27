@@ -232,7 +232,7 @@ class Cardinfo extends Controller
             }
 
 
-            return json(msg(111, "error"));
+            return apiJsonReturn(-111, "error！");
         } catch (\Error $error) {
 
             logs(json_encode(['file' => $error->getFile(),
@@ -270,7 +270,7 @@ class Cardinfo extends Controller
         if (!isset($message['data']) || empty($message['data'])) {
             return apiJsonReturn(-1, 'require data');
         }
-        $validate = new NotifycardValidate();
+        $validate = new NotifyzhoucardValidate();
         if (!$validate->check($message['data'])) {
             return apiJsonReturn(-1, $validate->getError());
         }
@@ -284,10 +284,19 @@ class Cardinfo extends Controller
             $param = $message['data'];
             unset($param['message']);
             ksort($param);
-            $sign = urldecode(http_build_query($param,"&"));
-            $sign = str_replace(' ','',$sign);
-            $sign = md5($sign . "&secret=" . $secret);
+            $sign = "";
+            foreach ($param as $k=>$v){
+//                $sign .= "&".$k."=".$v;
+                if ($k == 'cardTypeName'){
+                    $sign .= "&".$k."=".json_decode('"'.$v.'"', true);
+                }else{
+                    $sign .= "&".$k."=".$v;
+                }
+            }
 
+            $sign = substr($sign,1);
+
+            $sign = md5($sign . "&secret=" . $secret);
             if ($message['sign'] != $sign) {
                 return apiJsonReturn(-2, 'sign error', $validate->getError());
             }
@@ -310,7 +319,8 @@ class Cardinfo extends Controller
             //201	绑定成功 （金额与订单不符）
             //511	已被绑定过的卡密
             //500	失败状态（其他失败原因
-            if (isset($param['bindState']) && ($param['bindState'] == '200'||$param['bindState']=='201')) {
+            if (isset($param['bindState']) && ($param['bindState'] == '200' || $param['bindState'] == '201')) {
+
                 $updateCheckData['check_result'] = var_export($message, true);
                 $db::startTrans();
 
@@ -339,7 +349,7 @@ class Cardinfo extends Controller
                 $updateCheckData['pay_time'] = time();  //支付成功状态
                 $updateCheckData['actual_amount'] = $param['amount'];  //支付绑定金额
                 //如果订单金额与卡密金额不符合  ====
-                if ($param['bindState']=='201') {
+                if ($param['bindState'] == '201') {
                     $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回";  //支付成功状态
                     $updateCheckData['do_notify'] = 2;  //拒绝回调
                     $updateCheckData['notify_status'] = 2;  //拒绝回调
@@ -407,17 +417,75 @@ class Cardinfo extends Controller
                     return apiJsonReturn(-105, "exception！");
                 }
                 $db::commit();
-                echo "success";
+                return "success";
                 exit;
             }
 
+            //充值不成功
+            //511	已被绑定过的卡密
+            //500	失败状态（其他失败原因
+            if (isset($param['bindState']) && ($param['bindState'] == '511' || $param['bindState'] == '500')) {
+                $db::startTrans();
 
-            return json(msg(111, "error"));
+                //更新订单  START
+                //1、lock order start
+                $orderFind = $db::table('bsa_order')->where('id', '=', $orderData['id'])->lock(true)->find();
+                $updateCheckData['order_status'] = 2;  //支付状态支付失败
+                $updateCheckData['order_desc'] = "卡密充值失败";  //支付状态支付失败
+
+                //支付失败 修改核销商金额
+                $bsaWriteOffData = $db::table("bsa_write_off")
+                    ->where('write_off_sign', $orderFind['write_off_sign'])
+                    ->lock(true)
+                    ->find();
+
+                if (!$bsaWriteOffData) {
+                    $db::rollback();
+                    logs(json_encode([
+                        'order_no' => $orderFind['order_no'],
+                        'errorMessage' => "pay_fail_lock_write_off_fail",
+                        'last_sql' => $db::table("bsa_write_off")->getLastSql()
+                    ]), 'checkOrderLockWriteFail1');
+                }
+
+                $rateWhere['write_off_sign'] = $orderFind['write_off_sign'];
+                $rateWhere['cami_type_sign'] = $orderFind['operator'];
+                $rete = $db::table("bsa_cami_write")->where($rateWhere)->find()['rate'];
+                $freezeAmount = ($orderFind['amount'] * (1 - $rete));
+
+                //支付失败 核销商可用金额增加
+                //支付成功 核销商冻结金额减少
+                //增加核销商可用金额
+                //减少核销商冻结金额
+                $updateWriteOff = $db::table("bsa_write_off")
+                    ->execute("UPDATE bsa_write_off  SET 
+                                            use_amount = use_amount + " . (number_format($freezeAmount, 3)) . " ,
+                                            freeze_amount = freeze_amount - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+
+                if ($updateWriteOff != 1) {
+
+                    $doChangCheckStatus = true;  //下次继续查询
+                    logs(json_encode([
+                        'updateCamiChannelWhere' => $v['write_off_sign'],
+                        'updateSql' => $db::table("bsa_write_off")->getLastSql(),
+                        'updateMatchSuccessRes' => $updateWriteOff,
+                    ]), 'checkOrderUpdateWriteOffStatus2');
+                    $db::rollback();
+                    return apiJsonReturn(-195, "exception！");
+                }
+
+                $db::commit();
+                return "success";
+            }
+
+
+            return apiJsonReturn(-111, "error ！");
         } catch (\Error $error) {
 
             logs(json_encode(['file' => $error->getFile(),
                 'line' => $error->getLine(), 'errorMessage' => $error->getMessage()
-            ]), 'cardUploadNotifyError');
+            ]), 'cardUploadNotifyError2');
             return json(msg(-22, '', "接口异常!-22"));
         } catch (\Exception $exception) {
             logs(json_encode(['file' => $exception->getFile(),
