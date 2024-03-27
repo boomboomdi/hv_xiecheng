@@ -273,6 +273,7 @@ class Cardinfo extends Controller
             return apiJsonReturn(-1, $validate->getError());
         }
 
+        logs(json_encode(['data' => $message, "message" => $message]), 'TslcardUploadNotify_first1`');
 
         $db = new Db();
         try {
