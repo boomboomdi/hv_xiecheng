@@ -446,7 +446,7 @@ class Cardinfo extends Controller
                         'updateCheckData' => $updateCheckData,
                         'updateSql' => $db::table("bsa_order")->getLastSql(),
                         'updateOrderSuccessRes' => $updateOrderStatus,
-                    ]), 'checkOrderUpdateOrderStatus');
+                    ]), 'checkOrderUpdateOrderStatus401');
                     return apiJsonReturn(-401, "exception -401！");
                 }
 
@@ -488,7 +488,7 @@ class Cardinfo extends Controller
                         'updateCamiChannelWhere' => $orderFind['write_off_sign'],
                         'updateSql' => $db::table("bsa_write_off")->getLastSql(),
                         'updateMatchSuccessRes' => $updateWriteOff,
-                    ]), 'checkOrderUpdateWriteOffStatus2');
+                    ]), 'checkOrderUpdateWriteOffStatus402');
                     $db::rollback();
                     return apiJsonReturn(-402, "exception -402！");
                 }
