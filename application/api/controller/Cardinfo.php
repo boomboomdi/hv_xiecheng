@@ -261,6 +261,8 @@ class Cardinfo extends Controller
 
         $data = @file_get_contents('php://input');
         $message = json_decode($data, true);//获取 调用信息
+
+        logs(json_encode(['data' => $message, "message" => $message]), 'TslcardUploadNotify_first1`');
 //
         if (!isset($message['sign']) || empty($message['sign'])) {
             return apiJsonReturn(-1, 'require sign', '');
