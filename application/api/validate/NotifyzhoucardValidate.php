@@ -16,12 +16,12 @@ class NotifyzhoucardValidate extends Validate
     ];
 
     protected $message = [
-        'bizOrderNo.require' => 'uploadId require ',
-        'cardAmount.require' => 'uploadId require ',
-        'cardTypeName.require' => 'cardList require',
-        'cardType.require' => 'cardList require',
-        'bindState.require' => 'cardList require',
-        'message.require' => 'cardList require',
+        'bizOrderNo.require' => 'bizOrderNo require ',
+        'cardAmount.require' => 'cardAmount require ',
+        'cardTypeName.require' => 'cardTypeName require',
+        'cardType.require' => 'cardType require',
+        'bindState.require' => 'bindState require',
+        'message.require' => 'message require',
     ];
     protected $scene = [
     ];

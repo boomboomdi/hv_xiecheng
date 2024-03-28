@@ -3,8 +3,6 @@
 namespace app\api\controller;
 
 
-use app\admin\model\WriteoffModel;
-use Couchbase\IndexFailureException;
 use think\Controller;
 use think\Db;
 use app\common\model\CamiChannelModel;
