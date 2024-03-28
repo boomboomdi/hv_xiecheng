@@ -55,7 +55,7 @@ class CardzhouyiModel extends Model
             $uploadData['notify'] = 1;
             $uploadData['bizOrderNo'] = $cardData['orderNo'];
             $uploadData['bizNotifyUrl'] = $cardData['bizNotifyUrl'];
-            $uploadData['expectAmount'] = (int)$cardData['amount'] * 10;
+            $uploadData['expectAmount'] = (int)$cardData['amount'] * 100;
             $uploadData['expectCardType'] = 23;
 
             //sign = MD5('a=1&b=2&c=3&secret=xxxxxxxxxxxxxxxxx')
