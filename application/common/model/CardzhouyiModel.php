@@ -62,8 +62,8 @@ class CardzhouyiModel extends Model
             ksort($uploadData);
 
             $strobj = $uploadData;
-            $sign = urldecode(http_build_query($strobj,"&"));
-            $sign = str_replace(' ','',$sign);
+            $sign = urldecode(http_build_query($strobj, "&"));
+            $sign = str_replace(' ', '', $sign);
             $sign = md5($sign . "&secret=" . $secret);
             $postParam['sign'] = $sign;
             $postParam['data'] = $uploadData;
@@ -74,9 +74,9 @@ class CardzhouyiModel extends Model
             $responseData = json_decode($notifyResult, true);
             logs(json_encode([
                 'param' => $postParam,
-                'signstr' => json_decode(http_build_query($strobj, "&"). "&secret=" . $secret),
+                'signstr' => json_decode(http_build_query($strobj, "&") . "&secret=" . $secret),
                 'sign' => md5(json_decode(http_build_query($strobj, "&")) . "&secret=" . $secret),
-                'responseData' => var_export($responseData,true)]), 'Cardzhouyiuploadlog');
+                'responseData' => var_export($responseData, true)]), 'Cardzhouyiuploadlog');
 //            {
 //                "code": 200,
 //                "success": true,
@@ -86,6 +86,74 @@ class CardzhouyiModel extends Model
                 return modelReMsg(-2, $responseData, '上传失败' . $responseData['message']);
             }
             return modelReMsg(0, $responseData, "上传成功");
+        } catch (\Exception $exception) {
+            logs(json_encode(['param' => $cardData,
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'errorMessage' => $exception->getMessage()]), 'CardzhouyiModelException');
+            return modelReMsg(-11, '', $exception->getMessage());
+        } catch (\Error $error) {
+            logs(json_encode(['param' => $cardData,
+                'file' => $error->getFile(),
+                'line' => $error->getLine(),
+                'errorMessage' => $error->getMessage()]), 'CardzhouyiModelError');
+            return modelReMsg(-11, '', $error->getMessage());
+            return modelReMsg(-12, '', $error->getMessage());
+        }
+    }
+
+    /**
+     * 上传卡密
+     * @param $cardData
+     * @return array
+     */
+    public function check($cardData)
+    {
+        try {
+            $url = 'http://162.209.166.46/api/info';
+            $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367';
+            $checkData['merchantId'] = '1726613164899012608';
+            $checkData['orderNo'] = $cardData['order_me'];
+            $checkData['type'] = 2;
+
+            //sign = MD5('a=1&b=2&c=3&secret=xxxxxxxxxxxxxxxxx')
+            ksort($checkData);
+
+            $strobj = $checkData;
+            $sign = urldecode(http_build_query($strobj, "&"));
+            $sign = str_replace(' ', '', $sign);
+            $sign = md5($sign . "&secret=" . $secret);
+            $postParam['sign'] = $sign;
+            $postParam['data'] = $checkData;
+
+            $postParam = json_encode($postParam);
+//            {
+//                "code": 0,
+//                "message": "success",
+//                "data": {
+//                            "cardPwd": "2326992090166127165",
+//                    "cardKey": "141820",
+//                    "bizOrderNo": "123456578",
+//                    "bindState": 200,
+//                    "amount": 200 //注意单位元（卡密真实金额）
+//                }
+//            }
+
+            $notifyResult = curlPostJson($url, $postParam);
+            $responseData = json_decode($notifyResult, true);
+            logs(json_encode([
+                'action' => "tesila",
+                'param' => $postParam,
+                'responseData' => var_export($responseData, true)]), 'Cardzhouyichecklog');
+//            {
+//                "code": 200,
+//                "success": true,
+//                "message": "success"
+//            }
+            if ($responseData['data']['code'] != 0 || $responseData['message'] != 'success') {
+                return modelReMsg(-2, $responseData['data'], '查询成功' . $responseData['message']);
+            }
+            return modelReMsg(0, $responseData['data'], "查询成功");
         } catch (\Exception $exception) {
             logs(json_encode(['param' => $cardData,
                 'file' => $exception->getFile(),

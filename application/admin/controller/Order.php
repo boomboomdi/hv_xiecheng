@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 use app\admin\model\OrderModel;
+use app\common\model\CardzhouyiModel;
 use app\common\model\OrderdouyinModel;
 use app\common\model\OrderhexiaoModel;
 use think\Db;
@@ -216,119 +217,228 @@ class Order extends Base
                     logs(json_encode(['orderData' => $order, 'time' => date("Y-m-d H:i:s", time())]), 'checkOrder_closeOrderFail_log2');
                 }
                 Db::startTrans();
-                $appKey = "qG4UnbXxzgxdI6VU";
-                $url = "http://114.67.177.36:38088/queryCard?uploadId=" . $order['account'];  //uploadId
-                $headers = array("appKey: {$appKey}");
-//                    $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
+                if ($order['operator'] == 'Walmart') {
+                    return json(modelReMsg(-6, '', "沃尔玛待完善！"));
+                    $url = 'http://162.209.166.46/api/info';
 
-                $response = httpGET2($url, $headers);
-                $responseData = json_decode($response, true);
+                    $zhouyiModel = new CardzhouyiModel();
+                    $cardData['order_me'] = $order['order_me'];
+                    $responseData = $zhouyiModel->check($cardData);
 
-                Log::OrderLog('主动查询', $order['order_no'], var_export($responseData, true));
-                logs(json_encode(['orderNo' => $order['order_no'], 'uploadId' => $order['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $responseData]), 'checkorder_xc_log');
-
-                /**
-                 * 查询失败
-                 */
-                //查询失败
-                $updateCheckData['check_result'] = var_export($responseData, true);
-                if ($responseData['code'] != 200 || !isset($responseData['data']) || empty($responseData['data'])) {
-                    $updateOrderCheckStatusFail['check_status'] = 0;
-                    $updateOrderCheckStatusFail['next_check_time'] = time();
-                    $db::table("bsa_order")->where('id', $id)
-                        ->update($updateOrderCheckStatusFail);
-                    $db::commit();
-                    return json(modelReMsg(-7, '', "查询异常,请联系绑卡方技术！"));
-                }
-
-                $cardDta = $responseData['data'][0];
-                //待充值, 充值中  是可再查询状态
-                if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $cardDta['state'] == '充值中')) {
-                    $updateCheckDoingPayData['check_status'] = 0;  //查询状态
-                    $updateCheckDoingPayData['next_check_time'] = time() + 10;
-                    $db::commit();
-                    $db::table("bsa_order")->where('id', $id)
-                        ->update($updateCheckDoingPayData);
-                    return json(modelReMsg(1, '', "查询成功,卡密状态为：" . $cardDta['state']));
-                }
-                if ($cardDta['state'] == '充值失败') {
-                    $db::commit();
-                    $updateOrderCheckStatusNoPay['check_status'] = 2;
-                    $db::table("bsa_order")->where('id', $id)
-                        ->update($updateOrderCheckStatusNoPay);
-                    return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']));
-                }
-                if ($cardDta['state'] == '充值成功') {
-                    $updateCheckData['order_desc'] = "支付成功-等候回调";  //支付成功状态
-                    $updateCheckData['order_status'] = 1;  //支付成功状态
-                    $updateCheckData['pay_status'] = 1;  //支付成功状态
-                    $updateCheckData['pay_time'] = time();  //支付成功状态
-                    $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
-                    if ($cardDta['amount'] != $order['amount']) {
-                        $updateCheckData['order_desc'] = "支付成功-差额订单";  //支付成功状态
-                        $updateCheckData['do_notify'] = 2;  //拒绝回调
-                        $updateCheckData['notify_status'] = 2;  //拒绝回调
+                    Log::OrderLog('主动查询', $order['order_no'], var_export($responseData, true));
+                    logs(json_encode(['orderNo' => $order['order_no'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $responseData]), 'checkorder_walmart_log');
+                    $updateCheckData['check_result'] = var_export($responseData, true);
+                    if (!isset($responseData['code']) || $responseData['code'] != 0) {
+                        return json(modelReMsg(-7, '', $responseData['msg']));
                     }
-                    //修改订单状态
-                    $updateOrderStatus = $db::table("bsa_order")->where("id", $id)
-                        ->update($updateCheckData);
-                    if (!$updateOrderStatus) {
-                        $doChangCheckStatus = true;  //下次继续查询
-                        logs(json_encode([+
-                        'action' => 'updateMatch',
-                            'updateOrderWhere' => $order['order_no'],
-                            'updateCheckData' => $updateCheckData,
-                            'updateSql' => $db::table("bsa_order")->getLastSql(),
-                            'updateOrderSuccessRes' => $updateOrderStatus,
-                        ]), 'checkOrderUpdateOrderStatus');
-                        $db::rollback();
-                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-1！"));
+                    $response = $responseData['data'];
+                    if (empty($response)) {
+                        return json(modelReMsg(-8, '', $responseData['msg']));
                     }
-                    //修改核销商金额
-                    $bsaWriteOffData = $db::table("bsa_write_off")
-                        ->where('write_off_sign', '=', $order['write_off_sign'])
-                        ->lock(true)
-                        ->find();
-                    if (!$bsaWriteOffData) {
-                        $db::rollback();
-                        logs(json_encode([
-                            'order_no' => $order['order_no'],
-                            'errorMessage' => "pay_success_lock_write_off_fail",
-                            'last_sql' => $db::table("bsa_write_off")->getLastSql()
-                        ]), 'checkOrderLockWriteFail2');
+                    if (!isset($response['bindState']) || empty($responseData['bindState'])) {
+                        return json(modelReMsg(-9, '', $responseData['msg']));
+                    }
 
-                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-2！"));
+
+                    Db::startTrans();
+                    if ($response['state'] == 200||$response['state']==201) {
+                        $db::commit();
+                        $updateOrderCheckStatusNoPay['check_status'] = 2;
+                        $db::table("bsa_order")->where('id', $id)
+                            ->update($updateOrderCheckStatusNoPay);
+                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']));
                     }
-                    //支付成功 核销商上压金额增加
-                    $freezeAmount = ($order['amount'] * (1 - $order['rate']));
-                    //支付成功 核销商上压金额增加
+                    if ($response['state'] == '充值成功') {
+                        $updateCheckData['order_desc'] = "支付成功-等候回调";  //支付成功状态
+                        $updateCheckData['order_status'] = 1;  //支付成功状态
+                        $updateCheckData['pay_status'] = 1;  //支付成功状态
+                        $updateCheckData['pay_time'] = time();  //支付成功状态
+                        $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
+                        if ($cardDta['amount'] != $order['amount']) {
+                            $updateCheckData['order_desc'] = "支付成功-差额订单";  //支付成功状态
+                            $updateCheckData['do_notify'] = 2;  //拒绝回调
+                            $updateCheckData['notify_status'] = 2;  //拒绝回调
+                        }
+                        //修改订单状态
+                        $updateOrderStatus = $db::table("bsa_order")->where("id", $id)
+                            ->update($updateCheckData);
+                        if (!$updateOrderStatus) {
+                            $doChangCheckStatus = true;  //下次继续查询
+                            logs(json_encode([+
+                            'action' => 'updateMatch',
+                                'updateOrderWhere' => $order['order_no'],
+                                'updateCheckData' => $updateCheckData,
+                                'updateSql' => $db::table("bsa_order")->getLastSql(),
+                                'updateOrderSuccessRes' => $updateOrderStatus,
+                            ]), 'checkOrderUpdateOrderStatus');
+                            $db::rollback();
+                            return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state'] . "回调异常，请人工记录-1！"));
+                        }
+                        //修改核销商金额
+                        $bsaWriteOffData = $db::table("bsa_write_off")
+                            ->where('write_off_sign', '=', $order['write_off_sign'])
+                            ->lock(true)
+                            ->find();
+                        if (!$bsaWriteOffData) {
+                            $db::rollback();
+                            logs(json_encode([
+                                'order_no' => $order['order_no'],
+                                'errorMessage' => "pay_success_lock_write_off_fail",
+                                'last_sql' => $db::table("bsa_write_off")->getLastSql()
+                            ]), 'checkOrderLockWriteFail2');
+
+                            return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state'] . "回调异常，请人工记录-2！"));
+                        }
+                        //支付成功 核销商上压金额增加
+                        $freezeAmount = ($order['amount'] * (1 - $order['rate']));
+                        //支付成功 核销商上压金额增加
 //                                    $updateWriteOff = $db::table("bsa_write_off")
 //                                        ->where('write_off_sign', '=', $v['write_off_sign'])
 //                                        ->update($updateWriteData);
-                    $updateWriteOff = $db::table("bsa_write_off")
-                        ->execute("UPDATE bsa_write_off  SET 
+                        $updateWriteOff = $db::table("bsa_write_off")
+                            ->execute("UPDATE bsa_write_off  SET 
                                             use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,
                                             write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
                                             WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
-                    if ($updateWriteOff != 1) {
-                        logs(json_encode([
-                            'updateCamiChannelWhere' => $order['write_off_sign'],
-                            'updateSql' => $db::table("bsa_write_off")->getLastSql(),
-                            'updateMatchSuccessRes' => $updateWriteOff,
-                        ]), 'checkOrderUpdateWriteOffStatus');
-                        $db::rollback();
+                        if ($updateWriteOff != 1) {
+                            logs(json_encode([
+                                'updateCamiChannelWhere' => $order['write_off_sign'],
+                                'updateSql' => $db::table("bsa_write_off")->getLastSql(),
+                                'updateMatchSuccessRes' => $updateWriteOff,
+                            ]), 'checkOrderUpdateWriteOffStatus');
+                            $db::rollback();
 
-                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']."回调异常，请人工记录-3！"));
+                            return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state'] . "回调异常，请人工记录-3！"));
+                        }
                     }
+//                    {
+//                    "cardPwd": "2326992090166127165",
+//                    "cardKey": "141820",
+//                    "bizOrderNo": "123456578",
+//                    "bindState": 200,
+//                    "amount": 200 //注意单位元（卡密真实金额）
+//                }
+
+
+                }
+                if ($order['operator'] == 'XIECHENG') {
+                    $appKey = "qG4UnbXxzgxdI6VU";
+                    $url = "http://114.67.177.36:38088/queryCard?uploadId=" . $order['account'];  //uploadId
+                    $headers = array("appKey: {$appKey}");
+//                    $options = array('http' => array('method' => 'get', 'header' => implode("\r\n", $headers)));
+
+                    $response = httpGET2($url, $headers);
+                    $responseData = json_decode($response, true);
+
+                    Log::OrderLog('主动查询', $order['order_no'], var_export($responseData, true));
+                    logs(json_encode(['orderNo' => $order['order_no'], 'uploadId' => $order['account'], 'time' => date("Y-m-d H:i:s", time()), 'response' => $responseData]), 'checkorder_xc_log');
+
+                    /**
+                     * 查询失败
+                     */
+                    //查询失败
+                    Db::startTrans();
+                    $updateCheckData['check_result'] = var_export($responseData, true);
+                    if ($responseData['code'] != 200 || !isset($responseData['data']) || empty($responseData['data'])) {
+                        $updateOrderCheckStatusFail['check_status'] = 0;
+                        $updateOrderCheckStatusFail['next_check_time'] = time();
+                        $db::table("bsa_order")->where('id', $id)
+                            ->update($updateOrderCheckStatusFail);
+                        $db::commit();
+                        return json(modelReMsg(-7, '', "查询异常,请联系绑卡方技术！"));
+                    }
+
+                    $cardDta = $responseData['data'][0];
+                    //待充值, 充值中  是可再查询状态
+                    if (isset($cardDta['state']) && ($cardDta['state'] == '待充值' || $cardDta['state'] == '充值中')) {
+                        $updateCheckDoingPayData['check_status'] = 0;  //查询状态
+                        $updateCheckDoingPayData['next_check_time'] = time() + 10;
+                        $db::commit();
+                        $db::table("bsa_order")->where('id', $id)
+                            ->update($updateCheckDoingPayData);
+                        return json(modelReMsg(1, '', "查询成功,卡密状态为：" . $cardDta['state']));
+                    }
+                    if ($cardDta['state'] == '充值失败') {
+                        $db::commit();
+                        $updateOrderCheckStatusNoPay['check_status'] = 2;
+                        $db::table("bsa_order")->where('id', $id)
+                            ->update($updateOrderCheckStatusNoPay);
+                        return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state']));
+                    }
+                    if ($cardDta['state'] == '充值成功') {
+                        $updateCheckData['order_desc'] = "支付成功-等候回调";  //支付成功状态
+                        $updateCheckData['order_status'] = 1;  //支付成功状态
+                        $updateCheckData['pay_status'] = 1;  //支付成功状态
+                        $updateCheckData['pay_time'] = time();  //支付成功状态
+                        $updateCheckData['actual_amount'] = $cardDta['amount'];  //支付绑定金额
+                        if ($cardDta['amount'] != $order['amount']) {
+                            $updateCheckData['order_desc'] = "支付成功-差额订单";  //支付成功状态
+                            $updateCheckData['do_notify'] = 2;  //拒绝回调
+                            $updateCheckData['notify_status'] = 2;  //拒绝回调
+                        }
+                        //修改订单状态
+                        $updateOrderStatus = $db::table("bsa_order")->where("id", $id)
+                            ->update($updateCheckData);
+                        if (!$updateOrderStatus) {
+                            $doChangCheckStatus = true;  //下次继续查询
+                            logs(json_encode([+
+                            'action' => 'updateMatch',
+                                'updateOrderWhere' => $order['order_no'],
+                                'updateCheckData' => $updateCheckData,
+                                'updateSql' => $db::table("bsa_order")->getLastSql(),
+                                'updateOrderSuccessRes' => $updateOrderStatus,
+                            ]), 'checkOrderUpdateOrderStatus');
+                            $db::rollback();
+                            return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state'] . "回调异常，请人工记录-1！"));
+                        }
+                        //修改核销商金额
+                        $bsaWriteOffData = $db::table("bsa_write_off")
+                            ->where('write_off_sign', '=', $order['write_off_sign'])
+                            ->lock(true)
+                            ->find();
+                        if (!$bsaWriteOffData) {
+                            $db::rollback();
+                            logs(json_encode([
+                                'order_no' => $order['order_no'],
+                                'errorMessage' => "pay_success_lock_write_off_fail",
+                                'last_sql' => $db::table("bsa_write_off")->getLastSql()
+                            ]), 'checkOrderLockWriteFail2');
+
+                            return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state'] . "回调异常，请人工记录-2！"));
+                        }
+                        //支付成功 核销商上压金额增加
+                        $freezeAmount = ($order['amount'] * (1 - $order['rate']));
+                        //支付成功 核销商上压金额增加
+//                                    $updateWriteOff = $db::table("bsa_write_off")
+//                                        ->where('write_off_sign', '=', $v['write_off_sign'])
+//                                        ->update($updateWriteData);
+                        $updateWriteOff = $db::table("bsa_write_off")
+                            ->execute("UPDATE bsa_write_off  SET 
+                                            use_amount = use_amount - " . (number_format($freezeAmount, 3)) . " ,
+                                            write_off_deposit = write_off_deposit - " . (number_format($freezeAmount, 3)) . " 
+                                            WHERE  write_off_id = " . $bsaWriteOffData['write_off_id']);
+                        if ($updateWriteOff != 1) {
+                            logs(json_encode([
+                                'updateCamiChannelWhere' => $order['write_off_sign'],
+                                'updateSql' => $db::table("bsa_write_off")->getLastSql(),
+                                'updateMatchSuccessRes' => $updateWriteOff,
+                            ]), 'checkOrderUpdateWriteOffStatus');
+                            $db::rollback();
+
+                            return json(modelReMsg(0, '', "查询成功,卡密状态为：" . $cardDta['state'] . "回调异常，请人工记录-3！"));
+                        }
+                    }
+
+                    $db::commit();
+                    return json(modelReMsg(1, '', "查询成功,卡密状态为：" . $cardDta['state']));
                 }
 
-                $db::commit();
-                return json(modelReMsg(1, '', "查询成功,卡密状态为：" . $cardDta['state']));
 
             } else {
                 return json(modelReMsg(-99, '', '访问错误'));
             }
-        } catch (\Exception $exception) {
+        } catch
+        (\Exception $exception) {
             logs(json_encode(['id' => $id, 'file' => $exception->getFile(), 'line' => $exception->getLine(), 'errorMessage' => $exception->getMessage()]), 'order_notify_exception');
             return json(modelReMsg(-11, '', '通道异常'));
         } catch (\Error $error) {
