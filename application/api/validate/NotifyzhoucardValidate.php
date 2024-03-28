@@ -12,7 +12,7 @@ class NotifyzhoucardValidate extends Validate
         'cardTypeName' => 'require',
         'cardType' => 'require',
         'bindState' => 'require',
-        'message' => 'require',
+//        'message' => 'require',
     ];
 
     protected $message = [
@@ -21,7 +21,7 @@ class NotifyzhoucardValidate extends Validate
         'cardTypeName.require' => 'cardTypeName require',
         'cardType.require' => 'cardType require',
         'bindState.require' => 'bindState require',
-        'message.require' => 'message require',
+//        'message.require' => 'message require',
     ];
     protected $scene = [
     ];
