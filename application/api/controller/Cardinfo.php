@@ -345,10 +345,10 @@ class Cardinfo extends Controller
                 $updateCheckData['order_status'] = 1;  //支付成功状态
                 $updateCheckData['pay_status'] = 1;  //支付成功状态
                 $updateCheckData['pay_time'] = time();  //支付成功状态
-                $updateCheckData['actual_amount'] = $param['amount'];  //支付绑定金额
+                $updateCheckData['actual_amount'] = $param['cardAmount']/100;  //支付绑定金额
                 //如果订单金额与卡密金额不符合  ====
                 if ($param['bindState'] == '201') {
-                    $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回" . $param['cardAmount'];  //支付成功状态
+                    $updateCheckData['order_desc'] = "通道异步回调：充值成功，订单状态：差额拒回" . $param['cardAmount']/100;  //支付成功状态
                     $updateCheckData['do_notify'] = 2;  //拒绝回调
                     $updateCheckData['notify_status'] = 2;  //拒绝回调
                 }
