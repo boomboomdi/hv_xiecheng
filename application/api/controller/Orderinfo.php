@@ -677,12 +677,18 @@ class Orderinfo extends Controller
             if (time() > $orderData['order_limit_time']) {
                 return json(['code' => -3, 'msg' => '订单超时，请重新下单！', 'data' => []]);
             }
-
+            if(empty($param['acceptCardNo'])){
+                return json(['code' => -1, 'msg' => '卡号错误！', 'data' => []]);
+            }
+            if(empty($param['acceptCard'])){
+                return json(['code' => -1, 'msg' => '卡号错误！', 'data' => []]);
+            }
             try {
                 //卡密
                 $hasWhere['cami_account'] = $param['acceptCardNo'];
                 $hasWhere['cami_password'] = $param['acceptCard'];
                 $hasWhere['order_status'] = 1;
+
                 $isHasOrderData = $orderModel->where($hasWhere)->find();
 
                 if ($isHasOrderData) {
