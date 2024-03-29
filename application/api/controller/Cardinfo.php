@@ -277,7 +277,16 @@ class Cardinfo extends Controller
 
         $db = new Db();
         try {
-            $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367';
+            //8688  start
+            $merchantId = '1753066069654867968';   //8688
+            $secret = 'dbbb967e98f449dfa63ebf7480aa36798b4771763ef143d5a7b1405346b492cf';   //8688
+            //8688  end
+
+            //232699  start
+//            $merchantId = '1726613164899012608';   //232699
+//            $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367'; //232699
+            //232699  end
+
             logs(json_encode(['data' => $message, "message" => $message]), 'TslcardUploadNotify_first');
             $param = $message['data'];
             unset($param['message']);

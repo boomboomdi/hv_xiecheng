@@ -46,9 +46,17 @@ class CardzhouyiModel extends Model
     public function upload($cardData)
     {
         try {
+            //8688  start
+            $merchantId = '1753066069654867968';   //8688
+            $secret = 'dbbb967e98f449dfa63ebf7480aa36798b4771763ef143d5a7b1405346b492cf';   //8688
+            //8688  end
+
+            //232699  start
+//            $merchantId = '1726613164899012608';   //232699
+//            $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367'; //232699
+            //232699  end
             $url = 'http://162.209.166.46/api/order';
-            $secret = 'af6faf8c38294ef9bc10878b9947ca68b937a5437c8f4e9daf3b84e68a49f367';
-            $uploadData['merchantId'] = '1726613164899012608';
+            $uploadData['merchantId'] = $merchantId;
             $uploadData['actionType'] = 2;
             $uploadData['cardPwd'] = $cardData['cami_account'];
             $uploadData['cardKey'] = $cardData['cami_password'];
