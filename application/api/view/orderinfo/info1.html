@@ -115,7 +115,7 @@
                                 <div class="popviewhead-back c_payment_popview_head_back"
                                      data-name="popviewhead-back"></div>
                                 <span class="popviewhead-title c_payment_popview_head_title"
-                                      id="card_name_title">沃尔玛电子卡{$orderData['amount']}元</span>
+                                      id="card_name_title">京东沃尔玛电子卡{$orderData['amount']}元</span>
                             </div>
                             <div id="c_payment_topNotice"></div> <!--订单模块-->
                             <div class="p-index-paybill" id="c_payment_index_OrderDetail_box">
@@ -134,7 +134,7 @@
                                             <span class="bill-price-main">
                                             <span class="corange">
                                                  <span class="cfont18 bold"
-                                                       id="card_name">沃尔玛电子卡：面额{$orderData['amount']}元</span>
+                                                       id="card_name">京东沃尔玛电子卡：面额{$orderData['amount']}元</span>
                                             </span>
                                             </span>
                                         </div>
@@ -181,27 +181,27 @@
                                     </a>
                                 </div>
 
-                                <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">
-                                    <a class="p-n-index-btn" id="c_payment_index_payBtn_taobao"
-                                       style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
-                                       href="">点击跳转到淘宝购买</a>
-                                </div>
+<!--                                <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">-->
+<!--                                    <a class="p-n-index-btn" id="c_payment_index_payBtn_taobao"-->
+<!--                                       style="display: block; background-color: rgb(51, 122, 183);" target="_blank"-->
+<!--                                       href="">点击跳转到淘宝购买</a>-->
+<!--                                </div>-->
                                 <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">
                                     <a class="p-n-index-btn" id="c_payment_index_payBtn_jd"
                                        style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
                                        href="">点击跳转到京东购买</a>
                                 </div>
-                                <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">
-                                    <a class="p-n-index-btn" id="c_payment_index_payBtn_douyin"
-                                       style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
-                                       href="">点击跳转到抖音购买</a>
-                                </div>
-                                <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap"
-                                     style="opacity: 1;display: none;">
-                                    <a class="p-n-index-btn" id="c_payment_index_payBtn_pdd"
-                                       style="display: block; background-color: rgb(51, 122, 183);" target="_blank"
-                                       href="">点击跳转到拼多多购买</a>
-                                </div>
+<!--                                <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap" style="opacity: 1;">-->
+<!--                                    <a class="p-n-index-btn" id="c_payment_index_payBtn_douyin"-->
+<!--                                       style="display: block; background-color: rgb(51, 122, 183);" target="_blank"-->
+<!--                                       href="">点击跳转到抖音购买</a>-->
+<!--                                </div>-->
+<!--                                <div class="p-i-btn-box" id="c_payment_index_payBtn_wrap"-->
+<!--                                     style="opacity: 1;display: none;">-->
+<!--                                    <a class="p-n-index-btn" id="c_payment_index_payBtn_pdd"-->
+<!--                                       style="display: block; background-color: rgb(51, 122, 183);" target="_blank"-->
+<!--                                       href="">点击跳转到拼多多购买</a>-->
+<!--                                </div>-->
                                 <div id="c_payment_index_schema_tips"
                                      class="p-index-n-coupon corange pay-index-aimated fade-in-down"
                                      style="display: none; opacity: 0;"></div> <!--礼品卡节点-->
@@ -345,13 +345,16 @@
                                 function tishi() {
                                     if (true) {
                                         var tip = "<span style='font-size:18px;color:red'>使用帮助</span><br><br>" +
-                                            "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px; background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);'> 沃尔玛</span><br><br>" +
-                                            "<span style='font-size:18px;'>1.请购买正确卡密，否则无法使用</span><br><br>" +
-                                            "<span style='font-size:18px;'>2.注意：</span><span style='color:red;font-size:22px;'>" + prompt + "</span><br><br>" +
+                                            "<span style='font-size:22px;'>此卡为 </span> <span style='font-size:22px; background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);'>8688开头沃尔玛电子卡</span><br><br>" +
+                                            "<span style='font-size:18px;'>京东  无溢价  </span><br><br>" +
+                                            "<span style='font-size:18px;'>京东  无溢价   8688沃尔玛</span><br><br>" +
+                                            "<span style='font-size:18px;'>京东  无溢价  </span><br><br>" +
+                                            "<span style='font-size:18px;'>注：8688开头232699开头都可以提交</span><br><br>" +
+                                            "<span style='font-size:18px;'>购买成功获取卡密后，提交正确卡密 —充值秒到—</span><br><br>" +
+                                            // "<span style='font-size:18px;'>2.注意：</span><span style='color:red;font-size:22px;'>" + prompt + "</span><br> 京东  无溢价 <br>" +
                                             "<span style='font-size:16px;'>3.购买后 <span style='background-image: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);'>[无需确认收货]</span>（商家要求提前确认的为无法使用的卡密）</span><br><br>" +
-                                            "<span style='font-size:18px;'>4.购买成功后，提交正确卡号卡密即可充值</span><br><br>" +
-                                            "<span style='font-size:18px;'></span><span style='color:red;font-size:22px;'>让您在非淘宝/京东/抖音等电商平台交易的都是骗子</span><br><br>" +
-                                            "<span style='font-size:18px;'>店铺 【新百顺通专店】请勿购买，是骗子</span><br><br>"
+                                            "<span style='font-size:18px;'>4.购买成功获取卡密后，提交正确卡密 —充值秒到—</span><br><br>" +
+                                            "<span style='font-size:18px;'></span><span style='color:red;font-size:22px;'>让您在非淘宝/京东/抖音等电商平台交易的都是骗子</span><br><br>"
 
                                         layer.open({
                                             title: '温馨提示'
