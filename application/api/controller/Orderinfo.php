@@ -370,7 +370,9 @@ class Orderinfo extends Controller
                 exit;
             }
             $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
+            $jdUrl = "https://so.m.jd.com/ware/search.action?keyword=%E6%B2%83%E5%B0%94%E7%8E%9B%E5%8D%A1%E5%AF%86" . (int)$orderInfo['amount'] . "&searchFrom=search&sf=11&as=1";
             $this->assign('orderData', $orderInfo);
+            $this->assign('jdUrl', $jdUrl);
             return $this->fetch('info1');
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(),
@@ -386,7 +388,6 @@ class Orderinfo extends Controller
         }
 
     }
-
 
 
     /**
@@ -677,10 +678,10 @@ class Orderinfo extends Controller
             if (time() > $orderData['order_limit_time']) {
                 return json(['code' => -3, 'msg' => '订单超时，请重新下单！', 'data' => []]);
             }
-            if(empty($param['acceptCardNo'])){
+            if (empty($param['acceptCardNo'])) {
                 return json(['code' => -1, 'msg' => '卡号错误！', 'data' => []]);
             }
-            if(empty($param['acceptCard'])){
+            if (empty($param['acceptCard'])) {
                 return json(['code' => -1, 'msg' => '卡号错误！', 'data' => []]);
             }
             try {
