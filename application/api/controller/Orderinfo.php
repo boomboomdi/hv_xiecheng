@@ -371,8 +371,10 @@ class Orderinfo extends Controller
             }
             $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
             $jdUrl = "https://so.m.jd.com/ware/search.action?keyword=%E6%B2%83%E5%B0%94%E7%8E%9B%E5%8D%A1%E5%AF%86" . (int)$orderInfo['amount'] . "&searchFrom=search&sf=11&as=1";
+            $taobaoUrl = "https://main.m.taobao.com/search/index.html?spm=a215s.7406091.topbar.1.560c6770snz1OF&pageType=3&q=%E6%B2%83%E5%B0%94%E7%8E%9B%E7%94%B5%E5%AD%90%E5%8D%A1". (int)$orderInfo['amount'];
             $this->assign('orderData', $orderInfo);
             $this->assign('jdUrl', $jdUrl);
+            $this->assign('taobaoUrl', $taobaoUrl);
             return $this->fetch('info1');
         } catch (\Error $error) {
             logs(json_encode(['file' => $error->getFile(),
