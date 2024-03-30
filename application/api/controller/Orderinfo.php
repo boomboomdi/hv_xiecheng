@@ -371,7 +371,8 @@ class Orderinfo extends Controller
             }
             $orderInfo['camiTypeName'] = $db::table("bsa_cami_type")->where('cami_type_sign', $orderInfo['operator'])->find()['cami_type_username'];
             $jdUrl = "https://so.m.jd.com/ware/search.action?keyword=%E6%B2%83%E5%B0%94%E7%8E%9B%E5%8D%A1%E5%AF%86" . (int)$orderInfo['amount'] . "&searchFrom=search&sf=11&as=1";
-            $taobaoUrl = "https://main.m.taobao.com/search/index.html?spm=a215s.7406091.topbar.1.560c6770snz1OF&pageType=3&q=%E6%B2%83%E5%B0%94%E7%8E%9B%E7%94%B5%E5%AD%90%E5%8D%A1". (int)$orderInfo['amount'];
+//            $taobaoUrl = "https://main.m.taobao.com/search/index.html?spm=a215s.7406091.topbar.1.560c6770snz1OF&pageType=3&q=%E6%B2%83%E5%B0%94%E7%8E%9B%E7%94%B5%E5%AD%90%E5%8D%A1". (int)$orderInfo['amount'];
+            $taobaoUrl = "tbopen://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fmain.m.taobao.com%2Fsearch%2Findex.html%3Fspm%3Da215s.7406091.topbar.1.560c6770snz1OF%26pageType%3D3%26q%3D%25E6%25B2%2583%25E5%25B0%2594%25E7%258E%259B%25E7%2594%25B5%25E5%25AD%2590%25E5%258D%25A1". (int)$orderInfo['amount'];
             $this->assign('orderData', $orderInfo);
             $this->assign('jdUrl', $jdUrl);
             $this->assign('taobaoUrl', $taobaoUrl);
